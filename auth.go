@@ -55,12 +55,12 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 	})
 
 	auth.Post("/logout", func(c *fiber.Ctx) error {
-		json := new(User)
+		json := new(Session)
 		if err := c.BodyParser(json); err != nil {
 			return c.SendStatus(500)
 		}
-		empty := User{}
-		if json.Username == empty.Username {
+		empty := Session{}
+		if json.Sessionkey == empty.Sessionkey {
 			return c.Status(401).SendString("Invalid Data Sent")
 		}
 		return c.SendStatus(200)
