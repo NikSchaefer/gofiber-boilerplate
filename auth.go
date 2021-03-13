@@ -10,18 +10,20 @@ import (
 
 // User Auth Model
 type User struct {
-	gorm.Model
-	ID       guuid.UUID `gorm:"primaryKey" json:"id"`
-	Username string     `json:"username"`
-	Password string     `json:"password"`
-	Sessions []Session  `gorm:"foreignKey:UserRefer" gorm:"constraint:OnUpdate:CASCADE, OnDelete:CASCADE;"`
+	ID        guuid.UUID `gorm:"primaryKey" json:"-"`
+	Username  string     `json:"username"`
+	Password  string     `json:"-"`
+	Sessions  []Session  `gorm:"foreignKey:UserRefer; constraint:OnUpdate:CASCADE, OnDelete:CASCADE;"`
+	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
+	UpdatedAt int64      `gorm:"autoUpdateTime:milli" json:"-"`
 }
 
 // Session Model for the user
 type Session struct {
-	gorm.Model
-	Sessionkey guuid.UUID `gorm:"primaryKey"`
-	UserRefer  guuid.UUID
+	Sessionid guuid.UUID `gorm:"primaryKey" json:"sessionid"`
+	UserRefer guuid.UUID `json:"-"`
+	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
+	UpdatedAt int64      `gorm:"autoUpdateTime:milli" json:"-"`
 }
 
 // Initalize and set the authentication and authorization routes
@@ -46,7 +48,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if foundUser.Password != json.Password {
 			return c.Status(401).SendString("Incorrect Password")
 		}
-		newSession := Session{UserRefer: foundUser.ID, Sessionkey: guuid.New()}
+		newSession := Session{UserRefer: foundUser.ID, Sessionid: guuid.New()}
 		CreateErr := db.Create(&newSession).Error
 		if CreateErr != nil {
 			return c.Status(500).SendString("Creation Error")
@@ -59,10 +61,16 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if err := c.BodyParser(json); err != nil {
 			return c.SendStatus(500)
 		}
-		empty := Session{}
-		if json.Sessionkey == empty.Sessionkey {
+		if json.Sessionid == new(Session).Sessionid {
 			return c.Status(401).SendString("Invalid Data Sent")
 		}
+		session := Session{}
+		query := Session{Sessionid: json.Sessionid}
+		err := db.First(&session, query).Error
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(401).SendString("Session Not Found")
+		}
+		db.Delete(&session)
 		return c.SendStatus(200)
 	})
 	auth.Post("/create", func(c *fiber.Ctx) error {
