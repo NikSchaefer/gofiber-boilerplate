@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	guuid "github.com/google/uuid"
@@ -53,6 +54,12 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if CreateErr != nil {
 			return c.Status(500).SendString("Creation Error")
 		}
+		c.Cookie(&fiber.Cookie{
+			Name:     "sessionid",
+			Expires:  time.Now().Add(5 * 24 * time.Hour),
+			Value:    newSession.Sessionid.String(),
+			HTTPOnly: true,
+		})
 		return c.Status(200).JSON(newSession)
 	})
 
@@ -71,6 +78,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 			return c.Status(401).SendString("Session Not Found")
 		}
 		db.Delete(&session)
+		c.ClearCookie("sessionid")
 		return c.SendStatus(200)
 	})
 	auth.Post("/create", func(c *fiber.Ctx) error {
@@ -128,6 +136,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if createErr != nil {
 			fmt.Println(createErr)
 		}
+		c.ClearCookie("sessionid")
 		return c.SendStatus(200)
 	})
 	auth.Post("/update", func(c *fiber.Ctx) error {
