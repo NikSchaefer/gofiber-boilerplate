@@ -13,6 +13,7 @@ import (
 type User struct {
 	ID        guuid.UUID `gorm:"primaryKey" json:"-"`
 	Username  string     `json:"username"`
+	Email     string     `json:"email"`
 	Password  string     `json:"-"`
 	Sessions  []Session  `gorm:"foreignKey:UserRefer; constraint:OnUpdate:CASCADE, OnDelete:CASCADE;"`
 	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
@@ -25,6 +26,11 @@ type Session struct {
 	UserRefer guuid.UUID `json:"-"`
 	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
 	UpdatedAt int64      `gorm:"autoUpdateTime" json:"-"`
+}
+
+type ChangePassword struct {
+	User
+	NewPassword string
 }
 
 // Initalize and set the authentication and authorization routes
@@ -116,7 +122,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 	auth.Post("/delete", func(c *fiber.Ctx) error {
 		json := new(User)
 		if err := c.BodyParser(json); err != nil {
-			return c.SendStatus(500)
+			return c.SendStatus(400)
 		}
 		empty := User{}
 		if json.Username == empty.Username || empty.Password == json.Password {
@@ -156,7 +162,24 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		}
 		return c.SendStatus(200)
 	})
-
+	auth.Post("/changepassword", func(c *fiber.Ctx) error {
+		json := new(ChangePassword)
+		if err := c.BodyParser(json); err != nil {
+			return c.SendStatus(400)
+		}
+		foundUser := User{}
+		query := User{Username: json.Username}
+		err := db.First(&foundUser, &query).Error
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(401).SendString("User Not Found")
+		}
+		if foundUser.Password != json.Password {
+			return c.Status(401).SendString("Invalid Password")
+		}
+		foundUser.Password = json.NewPassword
+		db.Save(&foundUser)
+		return c.SendStatus(200)
+	})
 }
 
 func securityMiddleware(c *fiber.Ctx) error {
