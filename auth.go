@@ -182,6 +182,11 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 	})
 }
 
+func hashPassword(password string) string {
+
+	return password
+}
+
 func securityMiddleware(c *fiber.Ctx) error {
 	c.Set("X-XSS-Protection", "1; mode=block")
 	c.Set("X-Content-Type-Options", "nosniff")
