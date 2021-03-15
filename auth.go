@@ -183,7 +183,6 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 }
 
 func hashPassword(password string) string {
-
 	return password
 }
 
