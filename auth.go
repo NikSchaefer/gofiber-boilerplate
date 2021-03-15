@@ -24,7 +24,7 @@ type Session struct {
 	Sessionid guuid.UUID `gorm:"primaryKey" json:"sessionid"`
 	UserRefer guuid.UUID `json:"-"`
 	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
-	UpdatedAt int64      `gorm:"autoUpdateTime:milli" json:"-"`
+	UpdatedAt int64      `gorm:"autoUpdateTime" json:"-"`
 }
 
 // Initalize and set the authentication and authorization routes
@@ -73,7 +73,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		}
 		session := Session{}
 		query := Session{Sessionid: json.Sessionid}
-		err := db.First(&session, query).Error
+		err := db.First(&session, &query).Error
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("Session Not Found")
 		}
