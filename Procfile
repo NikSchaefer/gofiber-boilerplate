@@ -1,1 +1,1 @@
-web: ./Gofiber.exe
+web: Gofiber
