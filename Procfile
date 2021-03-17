@@ -1,1 +1,1 @@
-web: bin/Gofiber
+web: ./Gofiber.exe
