@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	guuid "github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +15,7 @@ type User struct {
 	ID        guuid.UUID `gorm:"primaryKey" json:"-"`
 	Username  string     `json:"username"`
 	Email     string     `json:"email"`
-	Password  string     `json:"-"`
+	Password  string     `json:"password"`
 	Sessions  []Session  `gorm:"foreignKey:UserRefer; constraint:OnUpdate:CASCADE, OnDelete:CASCADE;"`
 	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
 	UpdatedAt int64      `gorm:"autoUpdateTime:milli" json:"-"`
@@ -52,7 +53,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("User not Found")
 		}
-		if foundUser.Password != json.Password {
+		if !comparePasswords(foundUser.Password, []byte(json.Password)) {
 			return c.Status(401).SendString("Incorrect Password")
 		}
 		newSession := Session{UserRefer: foundUser.ID, Sessionid: guuid.New()}
@@ -96,9 +97,10 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if json.Username == empty.Username || empty.Password == json.Password {
 			return c.Status(401).SendString("Invalid Data Sent")
 		}
+		pw := hashAndSalt([]byte(json.Password))
 		newUser := User{
 			Username: json.Username,
-			Password: json.Password,
+			Password: pw,
 			ID:       guuid.New(),
 		}
 		foundUser := User{}
@@ -134,7 +136,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("User Not Found")
 		}
-		if json.Password != foundUser.Password {
+		if !comparePasswords(foundUser.Password, []byte(json.Password)) {
 			return c.Status(401).SendString("Invalid Credentials")
 		}
 		db.Model(&foundUser).Association("Sessions").Clear()
@@ -173,17 +175,39 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("User Not Found")
 		}
-		if foundUser.Password != json.Password {
+		if !comparePasswords(foundUser.Password, []byte(json.NewPassword)) {
 			return c.Status(401).SendString("Invalid Password")
 		}
-		foundUser.Password = json.NewPassword
+		foundUser.Password = hashAndSalt([]byte(json.Password))
 		db.Save(&foundUser)
 		return c.SendStatus(200)
 	})
 }
 
-func hashPassword(password string) string {
-	return password
+func hashAndSalt(pwd []byte) string {
+	// Use GenerateFromPassword to hash & salt pwd.
+	// MinCost is just an integer constant provided by the bcrypt
+	// package along with DefaultCost & MaxCost.
+	// The cost can be any value you want provided it isn't lower
+	// than the MinCost (4)
+	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// GenerateFromPassword returns a byte slice so we need to
+	// convert the bytes to a string and return it
+	return string(hash)
+}
+func comparePasswords(hashedPwd string, plainPwd []byte) bool {
+	// Since we'll be getting the hashed password from the DB it
+	// will be a string so we'll need to convert it to a byte slice
+	byteHash := []byte(hashedPwd)
+	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
 }
 
 func securityMiddleware(c *fiber.Ctx) error {
