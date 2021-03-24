@@ -1,1 +1,1 @@
-web: bin/go-fiber-boilerplate
+web: bin/go-fiber

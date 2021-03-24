@@ -1,4 +1,4 @@
-module github.com/NikSchaefer/go-fiber-boilerplate
+module github.com/NikSchaefer/go-fiber
 
 go 1.16
 

@@ -16,7 +16,7 @@ type User struct {
 	Username  string     `json:"username"`
 	Email     string     `json:"email"`
 	Password  string     `json:"password"`
-	Sessions  []Session  `gorm:"foreignKey:UserRefer; constraint:OnUpdate:CASCADE, OnDelete:CASCADE;"`
+	Sessions  []Session  `gorm:"foreignKey:UserRefer; constraint:OnUpdate:CASCADE, OnDelete:CASCADE;" json:"sessions"`
 	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
 	UpdatedAt int64      `gorm:"autoUpdateTime:milli" json:"-"`
 }
