@@ -92,8 +92,11 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		user := User{}
 		myUser := User{Username: "NikSchaefer"}
 		Sessions := []Session{}
+		Products := []Product{}
 		db.First(&user, &myUser)
 		db.Model(&user).Association("Sessions").Find(&Sessions)
+		db.Model(&user).Association("Products").Find(&Products)
+		user.Products = Products
 		user.Sessions = Sessions
 		return c.JSON(user)
 	})
@@ -115,7 +118,8 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if !comparePasswords(foundUser.Password, []byte(json.Password)) {
 			return c.Status(401).SendString("Invalid Credentials")
 		}
-		db.Model(&foundUser).Association("Sessions").Clear()
+		db.Model(&foundUser).Association("Sessions").Delete()
+		db.Model(&foundUser).Association("Products").Delete()
 		createErr := db.Delete(&foundUser).Error
 		if createErr != nil {
 			fmt.Println(createErr)
