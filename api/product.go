@@ -75,7 +75,17 @@ func ProductRoutes(router fiber.Router, db *gorm.DB) {
 		if err != 0 {
 			return c.SendStatus(err)
 		}
-		return c.Status(200).JSON(usr)
-
+		found := Product{}
+		query := Product{
+			Name:      json.Name,
+			UserRefer: usr.ID,
+		}
+		er := db.First(&found, &query).Error
+		if er == gorm.ErrRecordNotFound {
+			return c.Status(401).SendString("Product Not Found")
+		}
+		found.Value = json.Value
+		db.Delete(&found)
+		return c.SendStatus(200)
 	})
 }
