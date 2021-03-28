@@ -28,13 +28,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&User{}, &Session{})
+	db.AutoMigrate(&User{}, &Session{}, &Product{})
 
 	router.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(200).SendString("Hello, World!")
 	})
 
 	AuthRoutes(router, db)
+	ProductRoutes(router, db)
 
 	log.Fatal(router.Listen(":3000"))
 }

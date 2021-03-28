@@ -29,6 +29,15 @@ type Session struct {
 	UpdatedAt int64      `gorm:"autoUpdateTime" json:"-"`
 }
 
+// General Purpose Product Model
+type Product struct {
+	ProductID guuid.UUID `gorm:"primaryKey" json:"productid"`
+	UserRefer guuid.UUID `json:"-"`
+	Value     string     `json:"value"`
+	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
+	UpdatedAt int64      `gorm:"autoUpdateTime" json:"-"`
+}
+
 type ChangePassword struct {
 	User
 	NewPassword string
@@ -208,6 +217,50 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 		return false
 	}
 	return true
+}
+
+func ProductRoutes(router fiber.Router, db *gorm.DB) {
+	route := router.Group("/product", securityMiddleware)
+
+	route.Post("/create", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+	route.Post("/read", func(c *fiber.Ctx) error {
+		usr, err := authenticate(c, db)
+		if err != 0 {
+			return c.SendStatus(err)
+		}
+		return c.Status(200).JSON(usr)
+	})
+	route.Post("/update", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+	route.Post("/delete", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+
+}
+
+func authenticate(c *fiber.Ctx, db *gorm.DB) (User, int) {
+	json := new(Session)
+	if err := c.BodyParser(json); err != nil {
+		fmt.Println(err)
+		return User{}, 400
+	}
+	query := Session{Sessionid: json.Sessionid}
+	found := Session{}
+	err := db.First(&found, &query).Error
+	if err != nil {
+		return User{}, 401
+	}
+	
+	user := User{}
+	usrQuery := User{ID: found.UserRefer}
+	err = db.First(&user, &usrQuery).Error
+	if err != nil {
+		return User{}, 401
+	}
+	return user, 0
 }
 
 func securityMiddleware(c *fiber.Ctx) error {
