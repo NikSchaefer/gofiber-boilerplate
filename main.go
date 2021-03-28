@@ -18,7 +18,7 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: "*", // comma format e.g. "localhost, nikschaefer.tech"
 		AllowHeaders: "Origin, Content-Type, Accept",
-		AllowMethods: "GET,POST,PUT,DELETE",
+		AllowMethods: "GET, POST, PUT, DELETE",
 	}))
 	// DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
 	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
