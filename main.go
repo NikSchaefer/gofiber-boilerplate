@@ -24,7 +24,7 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 		AllowMethods: "GET,POST,PUT,DELETE",
 	}))
-
+	// DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
 	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
@@ -36,5 +36,5 @@ func main() {
 
 	api.Initalize(router, db)
 
-	log.Fatal(router.Listen(":3000"))
+	log.Fatal(router.Listen(":" + os.Getenv("PORT")))
 }
