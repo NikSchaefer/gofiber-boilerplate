@@ -13,11 +13,7 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
+	godotenv.Load()
 	router := fiber.New()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: "*", // comma format e.g. "localhost, nikschaefer.tech"
