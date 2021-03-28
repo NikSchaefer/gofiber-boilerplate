@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/NikSchaefer/go-fiber/api"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
@@ -28,14 +29,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&User{}, &Session{}, &Product{})
 
 	router.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(200).SendString("Hello, World!")
 	})
 
-	AuthRoutes(router, db)
-	ProductRoutes(router, db)
+	api.Initalize(router, db)
 
 	log.Fatal(router.Listen(":3000"))
 }
