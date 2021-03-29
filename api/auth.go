@@ -12,11 +12,11 @@ import (
 
 // Initalize and set the authentication and authorization routes
 func AuthRoutes(router fiber.Router, db *gorm.DB) {
-	auth := router.Group("/auth", SecurityMiddleware)
-	auth.Post("/login", func(c *fiber.Ctx) error {
+	route := router.Group("/auth", SecurityMiddleware)
+	route.Post("/login", func(c *fiber.Ctx) error {
 		json := new(User)
 		if err := c.BodyParser(json); err != nil {
-			return c.SendStatus(500)
+			return c.SendStatus(400)
 		}
 		empty := User{}
 		if json.Username == empty.Username || empty.Password == json.Password {
@@ -46,10 +46,10 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		return c.Status(200).JSON(session)
 	})
 
-	auth.Post("/logout", func(c *fiber.Ctx) error {
+	route.Post("/logout", func(c *fiber.Ctx) error {
 		json := new(Session)
 		if err := c.BodyParser(json); err != nil {
-			return c.SendStatus(500)
+			return c.SendStatus(400)
 		}
 		if json.Sessionid == new(Session).Sessionid {
 			return c.Status(401).SendString("Invalid Data Sent")
@@ -64,10 +64,10 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		c.ClearCookie("sessionid")
 		return c.SendStatus(200)
 	})
-	auth.Post("/create", func(c *fiber.Ctx) error {
+	route.Post("/create", func(c *fiber.Ctx) error {
 		json := new(User)
 		if err := c.BodyParser(json); err != nil {
-			return c.SendStatus(500)
+			return c.SendStatus(400)
 		}
 		empty := User{}
 		if json.Username == empty.Username || empty.Password == json.Password {
@@ -88,19 +88,24 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		db.Create(&new)
 		return c.SendStatus(200)
 	})
-	auth.Post("/user", func(c *fiber.Ctx) error {
-		user := User{}
-		query := User{Username: "NikSchaefer"}
+	route.Post("/user", func(c *fiber.Ctx) error {
+		json := new(Session)
+		if err := c.BodyParser(json); err != nil {
+			return c.SendStatus(400)
+		}
+		user, err := GetUser(json.Sessionid, db)
+		if err != 0 {
+			return c.SendStatus(err)
+		}
 		Sessions := []Session{}
 		Products := []Product{}
-		db.First(&user, &query)
 		db.Model(&user).Association("Sessions").Find(&Sessions)
 		db.Model(&user).Association("Products").Find(&Products)
 		user.Products = Products
 		user.Sessions = Sessions
 		return c.JSON(user)
 	})
-	auth.Post("/delete", func(c *fiber.Ctx) error {
+	route.Post("/delete", func(c *fiber.Ctx) error {
 		json := new(User)
 		if err := c.BodyParser(json); err != nil {
 			return c.SendStatus(400)
@@ -124,7 +129,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		c.ClearCookie("sessionid")
 		return c.SendStatus(200)
 	})
-	auth.Post("/update", func(c *fiber.Ctx) error {
+	route.Post("/update", func(c *fiber.Ctx) error {
 		json := new(User)
 		if err := c.BodyParser(json); err != nil {
 			return c.SendStatus(500)
@@ -141,7 +146,7 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		}
 		return c.SendStatus(200)
 	})
-	auth.Post("/changepassword", func(c *fiber.Ctx) error {
+	route.Post("/changepassword", func(c *fiber.Ctx) error {
 		json := new(ChangePassword)
 		if err := c.BodyParser(json); err != nil {
 			return c.SendStatus(400)
