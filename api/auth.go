@@ -86,7 +86,18 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 			return c.Status(401).SendString("User Already Exists")
 		}
 		db.Create(&new)
-		return c.SendStatus(200)
+		session := Session{UserRefer: new.ID, Sessionid: guuid.New()}
+		err = db.Create(&session).Error
+		if err != nil {
+			return c.Status(500).SendString("Creation Error")
+		}
+		c.Cookie(&fiber.Cookie{
+			Name:     "sessionid",
+			Expires:  time.Now().Add(5 * 24 * time.Hour),
+			Value:    session.Sessionid.String(),
+			HTTPOnly: true,
+		})
+		return c.Status(200).JSON(session)
 	})
 	route.Post("/user", func(c *fiber.Ctx) error {
 		json := new(Session)
