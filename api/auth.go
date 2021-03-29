@@ -23,27 +23,27 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 			return c.Status(401).SendString("Invalid Data Sent")
 		}
 
-		foundUser := User{}
-		queryUser := User{Username: json.Username}
-		err := db.First(&foundUser, &queryUser).Error
+		found := User{}
+		query := User{Username: json.Username}
+		err := db.First(&found, &query).Error
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("User not Found")
 		}
-		if !comparePasswords(foundUser.Password, []byte(json.Password)) {
+		if !comparePasswords(found.Password, []byte(json.Password)) {
 			return c.Status(401).SendString("Incorrect Password")
 		}
-		newSession := Session{UserRefer: foundUser.ID, Sessionid: guuid.New()}
-		CreateErr := db.Create(&newSession).Error
-		if CreateErr != nil {
+		session := Session{UserRefer: found.ID, Sessionid: guuid.New()}
+		err = db.Create(&session).Error
+		if err != nil {
 			return c.Status(500).SendString("Creation Error")
 		}
 		c.Cookie(&fiber.Cookie{
 			Name:     "sessionid",
 			Expires:  time.Now().Add(5 * 24 * time.Hour),
-			Value:    newSession.Sessionid.String(),
+			Value:    session.Sessionid.String(),
 			HTTPOnly: true,
 		})
-		return c.Status(200).JSON(newSession)
+		return c.Status(200).JSON(session)
 	})
 
 	auth.Post("/logout", func(c *fiber.Ctx) error {
@@ -74,26 +74,26 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 			return c.Status(401).SendString("Invalid Data Sent")
 		}
 		pw := hashAndSalt([]byte(json.Password))
-		newUser := User{
+		new := User{
 			Username: json.Username,
 			Password: pw,
 			ID:       guuid.New(),
 		}
-		foundUser := User{}
+		found := User{}
 		query := User{Username: json.Username}
-		err := db.First(&foundUser, &query).Error
+		err := db.First(&found, &query).Error
 		if err != gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("User Already Exists")
 		}
-		db.Create(&newUser)
+		db.Create(&new)
 		return c.SendStatus(200)
 	})
 	auth.Post("/user", func(c *fiber.Ctx) error {
 		user := User{}
-		myUser := User{Username: "NikSchaefer"}
+		query := User{Username: "NikSchaefer"}
 		Sessions := []Session{}
 		Products := []Product{}
-		db.First(&user, &myUser)
+		db.First(&user, &query)
 		db.Model(&user).Association("Sessions").Find(&Sessions)
 		db.Model(&user).Association("Products").Find(&Products)
 		user.Products = Products
@@ -109,21 +109,18 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if json.Username == empty.Username || empty.Password == json.Password {
 			return c.Status(401).SendString("Invalid Data Sent")
 		}
-		foundUser := User{}
+		found := User{}
 		query := User{Username: json.Username}
-		err := db.First(&foundUser, &query).Error
+		err := db.First(&found, &query).Error
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("User Not Found")
 		}
-		if !comparePasswords(foundUser.Password, []byte(json.Password)) {
+		if !comparePasswords(found.Password, []byte(json.Password)) {
 			return c.Status(401).SendString("Invalid Credentials")
 		}
-		db.Model(&foundUser).Association("Sessions").Delete()
-		db.Model(&foundUser).Association("Products").Delete()
-		createErr := db.Delete(&foundUser).Error
-		if createErr != nil {
-			fmt.Println(createErr)
-		}
+		db.Model(&found).Association("Sessions").Delete()
+		db.Model(&found).Association("Products").Delete()
+		db.Delete(&found)
 		c.ClearCookie("sessionid")
 		return c.SendStatus(200)
 	})
@@ -136,9 +133,9 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if json.Username == empty.Username || empty.Password == json.Password {
 			return c.Status(401).SendString("Invalid Data Sent")
 		}
-		foundUser := User{}
+		found := User{}
 		query := User{Username: json.Username}
-		err := db.First(&foundUser, &query).Error
+		err := db.First(&found, &query).Error
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("User Not Found")
 		}
@@ -149,17 +146,17 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if err := c.BodyParser(json); err != nil {
 			return c.SendStatus(400)
 		}
-		foundUser := User{}
+		found := User{}
 		query := User{Username: json.Username}
-		err := db.First(&foundUser, &query).Error
+		err := db.First(&found, &query).Error
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("User Not Found")
 		}
-		if !comparePasswords(foundUser.Password, []byte(json.NewPassword)) {
+		if !comparePasswords(found.Password, []byte(json.NewPassword)) {
 			return c.Status(401).SendString("Invalid Password")
 		}
-		foundUser.Password = hashAndSalt([]byte(json.Password))
-		db.Save(&foundUser)
+		found.Password = hashAndSalt([]byte(json.Password))
+		db.Save(&found)
 		return c.SendStatus(200)
 	})
 }
