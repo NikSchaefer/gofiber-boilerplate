@@ -15,9 +15,9 @@ func ProductRoutes(router fiber.Router, db *gorm.DB) {
 		if err := c.BodyParser(json); err != nil {
 			return c.SendStatus(400)
 		}
-		usr, err := GetUser(json.Sessionid, db)
-		if err != 0 {
-			return c.SendStatus(err)
+		usr, status := GetUser(json.Sessionid, db)
+		if status != 0 {
+			return c.SendStatus(status)
 		}
 		newProduct := Product{
 			ProductID: guuid.New(),
@@ -25,8 +25,8 @@ func ProductRoutes(router fiber.Router, db *gorm.DB) {
 			Name:      json.Name,
 			Value:     json.Value,
 		}
-		er := db.Create(&newProduct).Error
-		if er != nil {
+		err := db.Create(&newProduct).Error
+		if err != nil {
 			return c.SendStatus(400)
 		}
 		return c.SendStatus(200)
