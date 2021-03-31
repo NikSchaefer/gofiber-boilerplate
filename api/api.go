@@ -1,6 +1,8 @@
 package api
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
 	guuid "github.com/google/uuid"
 	"gorm.io/gorm"
@@ -21,9 +23,9 @@ type User struct {
 // Session Model for the user
 type Session struct {
 	Sessionid guuid.UUID `gorm:"primaryKey" json:"sessionid"`
+	Expires   time.Time  `json:"-"`
 	UserRefer guuid.UUID `json:"-"`
 	CreatedAt int64      `gorm:"autoCreateTime" json:"-" `
-	UpdatedAt int64      `gorm:"autoUpdateTime" json:"-"`
 }
 
 // General Purpose Product Model

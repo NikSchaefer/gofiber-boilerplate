@@ -32,14 +32,14 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if !comparePasswords(found.Password, []byte(json.Password)) {
 			return c.Status(401).SendString("Incorrect Password")
 		}
-		session := Session{UserRefer: found.ID, Sessionid: guuid.New()}
+		session := Session{UserRefer: found.ID, Expires: SessionExpires(), Sessionid: guuid.New()}
 		err = db.Create(&session).Error
 		if err != nil {
 			return c.Status(500).SendString("Creation Error")
 		}
 		c.Cookie(&fiber.Cookie{
 			Name:     "sessionid",
-			Expires:  time.Now().Add(5 * 24 * time.Hour),
+			Expires:  SessionExpires(),
 			Value:    session.Sessionid.String(),
 			HTTPOnly: true,
 		})
@@ -108,12 +108,9 @@ func AuthRoutes(router fiber.Router, db *gorm.DB) {
 		if err != 0 {
 			return c.SendStatus(err)
 		}
-		Sessions := []Session{}
 		Products := []Product{}
-		db.Model(&user).Association("Sessions").Find(&Sessions)
 		db.Model(&user).Association("Products").Find(&Products)
 		user.Products = Products
-		user.Sessions = Sessions
 		return c.JSON(user)
 	})
 	route.Post("/delete", func(c *fiber.Ctx) error {
@@ -201,4 +198,8 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 		return false
 	}
 	return true
+}
+
+func SessionExpires() time.Time {
+	return time.Now().Add(5 * 24 * time.Hour)
 }
