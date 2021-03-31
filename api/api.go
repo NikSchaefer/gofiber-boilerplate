@@ -69,12 +69,6 @@ func GetUser(sessionid guuid.UUID, db *gorm.DB) (User, int) {
 }
 
 func SecurityMiddleware(c *fiber.Ctx) error {
-	c.Set("X-XSS-Protection", "1; mode=block")
-	c.Set("X-Content-Type-Options", "nosniff")
-	c.Set("X-Download-Options", "noopen")
-	c.Set("Strict-Transport-Security", "max-age=5184000")
-	c.Set("X-Frame-Options", "DENY")
-	c.Set("X-DNS-Prefetch-Control", "off")
 	c.Accepts("application/json")
 	return c.Next()
 }

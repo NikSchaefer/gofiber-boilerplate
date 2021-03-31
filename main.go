@@ -18,8 +18,19 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins: "*", // comma format e.g. "localhost, nikschaefer.tech"
 		AllowHeaders: "Origin, Content-Type, Accept",
-		AllowMethods: "GET, POST, PUT, DELETE",
+		AllowMethods: "GET, POST",
 	}))
+
+	router.Use(func(c *fiber.Ctx) error {
+		c.Set("X-XSS-Protection", "1; mode=block")
+		c.Set("X-Content-Type-Options", "nosniff")
+		c.Set("X-Download-Options", "noopen")
+		c.Set("Strict-Transport-Security", "max-age=5184000")
+		c.Set("X-Frame-Options", "DENY")
+		c.Set("X-DNS-Prefetch-Control", "off")
+		return c.Next()
+	})
+
 	// DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
 	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
 	if err != nil {
