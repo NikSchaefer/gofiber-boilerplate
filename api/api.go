@@ -74,3 +74,17 @@ func JsonMiddleware(c *fiber.Ctx) error {
 	c.Accepts("application/json")
 	return c.Next()
 }
+
+// func AuthenticatedMiddleware(c *fiber.Ctx) error {
+// 	c.Accepts("application/json")
+// 	json := new(Session)
+// 	if err := c.BodyParser(json); err != nil {
+// 		return c.SendStatus(fiber.StatusBadRequest)
+// 	}
+// 	user, status := GetUser(json.Sessionid, database)
+// 	if status != 0 {
+// 		return c.SendStatus(status)
+// 	}
+// 	c.Locals("user", user)
+// 	return c.Next()
+// }

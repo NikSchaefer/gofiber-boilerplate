@@ -13,6 +13,12 @@ import (
 )
 
 func main() {
+	// Set Env variables for
+	// PORT=3000
+	// DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
+	// If deploying with Heroku these will be 
+	// automatically set provided you have created a db add on
+	
 	godotenv.Load()
 	router := fiber.New()
 	router.Use(cors.New(cors.Config{
@@ -31,7 +37,6 @@ func main() {
 		return c.Next()
 	})
 
-	// DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
 	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)

@@ -9,7 +9,6 @@ import (
 
 func ProductRoutes(router fiber.Router, db *gorm.DB) {
 	route := router.Group("/product", JsonMiddleware)
-
 	route.Post("/create", func(c *fiber.Ctx) error {
 		json := new(ProductRequest)
 		if err := c.BodyParser(json); err != nil {
@@ -82,7 +81,7 @@ func ProductRoutes(router fiber.Router, db *gorm.DB) {
 		}
 		err := db.First(&found, &query).Error
 		if err == gorm.ErrRecordNotFound {
-			return c.Status(401).SendString("Product Not Found")
+			return c.Status(fiber.StatusNotFound).SendString("Product Not Found")
 		}
 		found.Value = json.Value
 		db.Delete(&found)
