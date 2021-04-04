@@ -8,12 +8,12 @@ import (
 )
 
 func ProductRoutes(router fiber.Router, db *gorm.DB) {
-	route := router.Group("/product", SecurityMiddleware)
+	route := router.Group("/product", JsonMiddleware)
 
 	route.Post("/create", func(c *fiber.Ctx) error {
 		json := new(ProductRequest)
 		if err := c.BodyParser(json); err != nil {
-			return c.SendStatus(400)
+			return c.SendStatus(fiber.StatusBadRequest)
 		}
 		usr, status := GetUser(json.Sessionid, db)
 		if status != 0 {
@@ -27,14 +27,14 @@ func ProductRoutes(router fiber.Router, db *gorm.DB) {
 		}
 		err := db.Create(&newProduct).Error
 		if err != nil {
-			return c.SendStatus(400)
+			return c.SendStatus(fiber.StatusBadRequest)
 		}
-		return c.SendStatus(200)
+		return c.SendStatus(fiber.StatusOK)
 	})
 	route.Post("/read", func(c *fiber.Ctx) error {
 		json := new(ProductRequest)
 		if err := c.BodyParser(json); err != nil {
-			return c.SendStatus(400)
+			return c.SendStatus(fiber.StatusBadRequest)
 		}
 		usr, err := GetUser(json.Sessionid, db)
 		if err != 0 {
@@ -42,50 +42,50 @@ func ProductRoutes(router fiber.Router, db *gorm.DB) {
 		}
 		Products := []Product{}
 		db.Model(&usr).Association("Products").Find(&Products)
-		return c.Status(200).JSON(Products)
+		return c.Status(fiber.StatusOK).JSON(Products)
 	})
 	route.Post("/update", func(c *fiber.Ctx) error {
 		json := new(ProductRequest)
 		if err := c.BodyParser(json); err != nil {
-			return c.SendStatus(400)
+			return c.SendStatus(fiber.StatusBadRequest)
 		}
-		usr, err := GetUser(json.Sessionid, db)
-		if err != 0 {
-			return c.SendStatus(err)
+		usr, status := GetUser(json.Sessionid, db)
+		if status != 0 {
+			return c.SendStatus(status)
 		}
 		found := Product{}
 		query := Product{
 			Name:      json.Name,
 			UserRefer: usr.ID,
 		}
-		er := db.First(&found, &query).Error
-		if er == gorm.ErrRecordNotFound {
-			return c.Status(401).SendString("Product Not Found")
+		err := db.First(&found, &query).Error
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusUnauthorized).SendString("Product Not Found")
 		}
 		found.Value = json.Value
 		db.Save(&found)
-		return c.SendStatus(200)
+		return c.SendStatus(fiber.StatusOK)
 	})
 	route.Post("/delete", func(c *fiber.Ctx) error {
 		json := new(ProductRequest)
 		if err := c.BodyParser(json); err != nil {
-			return c.SendStatus(400)
+			return c.SendStatus(fiber.StatusBadRequest)
 		}
-		usr, err := GetUser(json.Sessionid, db)
-		if err != 0 {
-			return c.SendStatus(err)
+		usr, status := GetUser(json.Sessionid, db)
+		if status != 0 {
+			return c.SendStatus(status)
 		}
 		found := Product{}
 		query := Product{
 			Name:      json.Name,
 			UserRefer: usr.ID,
 		}
-		er := db.First(&found, &query).Error
-		if er == gorm.ErrRecordNotFound {
+		err := db.First(&found, &query).Error
+		if err == gorm.ErrRecordNotFound {
 			return c.Status(401).SendString("Product Not Found")
 		}
 		found.Value = json.Value
 		db.Delete(&found)
-		return c.SendStatus(200)
+		return c.SendStatus(fiber.StatusOK)
 	})
 }

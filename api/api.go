@@ -58,19 +58,19 @@ func GetUser(sessionid guuid.UUID, db *gorm.DB) (User, int) {
 	query := Session{Sessionid: sessionid}
 	found := Session{}
 	err := db.First(&found, &query).Error
-	if err != nil {
-		return User{}, 401
+	if err == gorm.ErrRecordNotFound {
+		return User{}, fiber.StatusNotFound
 	}
 	user := User{}
 	usrQuery := User{ID: found.UserRefer}
 	err = db.First(&user, &usrQuery).Error
-	if err != nil {
-		return User{}, 401
+	if err == gorm.ErrRecordNotFound {
+		return User{}, fiber.StatusNotFound
 	}
 	return user, 0
 }
 
-func SecurityMiddleware(c *fiber.Ctx) error {
+func JsonMiddleware(c *fiber.Ctx) error {
 	c.Accepts("application/json")
 	return c.Next()
 }
