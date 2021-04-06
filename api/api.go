@@ -48,6 +48,7 @@ type ChangePassword struct {
 	NewPassword string `json:"sessionid"`
 }
 
+// Set Routes and Migrations for Models
 func Initalize(router fiber.Router, db *gorm.DB) {
 	db.AutoMigrate(&User{}, &Session{}, &Product{})
 	AuthRoutes(router, db)
