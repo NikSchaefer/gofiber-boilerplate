@@ -19,13 +19,10 @@ func CreateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	usr, status := GetUser(json.Sessionid)
-	if status != 0 {
-		return c.SendStatus(status)
-	}
+	user := c.Locals("user").(User)
 	newProduct := Product{
 		ProductID: guuid.New(),
-		UserRefer: usr.ID,
+		UserRefer: user.ID,
 		Name:      json.Name,
 		Value:     json.Value,
 	}
@@ -37,32 +34,43 @@ func CreateProduct(c *fiber.Ctx) error {
 }
 func GetProduct(c *fiber.Ctx) error {
 	db := database.DB
+	user := c.Locals("user").(User)
 	json := new(ProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
-	}
-	usr, err := GetUser(json.Sessionid)
-	if err != 0 {
-		return c.SendStatus(err)
 	}
 	Products := []Product{}
-	db.Model(&usr).Association("Products").Find(&Products)
+	db.Model(&user).Association("Products").Find(&Products)
 	return c.Status(fiber.StatusOK).JSON(Products)
 }
+func GetProductById(c *fiber.Ctx) error {
+	db := database.DB
+	id, err := guuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid id format")
+	}
+	product := Product{}
+	query := Product{
+		ProductID: id,
+	}
+	err = db.First(&product, &query).Error
+	if err == gorm.ErrRecordNotFound {
+		return c.Status(fiber.StatusNotFound).SendString("Not Found")
+	}
+	return c.Status(fiber.StatusOK).JSON(product)
+}
+
 func UpdateProduct(c *fiber.Ctx) error {
 	db := database.DB
+	user := c.Locals("user").(User)
 	json := new(ProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
-	}
-	usr, status := GetUser(json.Sessionid)
-	if status != 0 {
-		return c.SendStatus(status)
 	}
 	found := Product{}
 	query := Product{
 		Name:      json.Name,
-		UserRefer: usr.ID,
+		UserRefer: user.ID,
 	}
 	err := db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
@@ -74,18 +82,15 @@ func UpdateProduct(c *fiber.Ctx) error {
 }
 func DeleteProduct(c *fiber.Ctx) error {
 	db := database.DB
+	user := c.Locals("user").(User)
 	json := new(ProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	usr, status := GetUser(json.Sessionid)
-	if status != 0 {
-		return c.SendStatus(status)
-	}
 	found := Product{}
 	query := Product{
 		Name:      json.Name,
-		UserRefer: usr.ID,
+		UserRefer: user.ID,
 	}
 	err := db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {

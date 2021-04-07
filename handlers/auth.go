@@ -30,7 +30,6 @@ func GetUser(sessionid guuid.UUID) (User, int) {
 	if err == gorm.ErrRecordNotFound {
 		return User{}, fiber.StatusNotFound
 	}
-
 	user := User{}
 	usrQuery := User{ID: found.UserRefer}
 	err = db.First(&user, &usrQuery).Error
@@ -97,7 +96,6 @@ func Logout(c *fiber.Ctx) error {
 
 func CreateUser(c *fiber.Ctx) error {
 	db := database.DB
-
 	json := new(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -138,21 +136,11 @@ func CreateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(session)
 }
 func GetUserInfo(c *fiber.Ctx) error {
+	user := c.Locals("user").(User)
 	db := database.DB
-	json := new(Session)
-	if err := c.BodyParser(json); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
-
-	user, status := GetUser(json.Sessionid)
-	if status != 0 {
-		return c.SendStatus(status)
-	}
 	var Products []model.Product = []model.Product{}
-
 	db.Model(&user).Association("Products").Find(&Products)
 	user.Products = Products
-
 	return c.JSON(user)
 }
 func DeleteUser(c *fiber.Ctx) error {
@@ -178,24 +166,6 @@ func DeleteUser(c *fiber.Ctx) error {
 	db.Model(&found).Association("Products").Delete()
 	db.Delete(&found)
 	c.ClearCookie("sessionid")
-	return c.SendStatus(fiber.StatusOK)
-}
-func UpdateUser(c *fiber.Ctx) error {
-	db := database.DB
-	json := new(User)
-	if err := c.BodyParser(json); err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
-	}
-	empty := User{}
-	if json.Username == empty.Username || empty.Password == json.Password {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid Data Sent")
-	}
-	found := User{}
-	query := User{Username: json.Username}
-	err := db.First(&found, &query).Error
-	if err == gorm.ErrRecordNotFound {
-		return c.Status(fiber.StatusNotFound).SendString("User Not Found")
-	}
 	return c.SendStatus(fiber.StatusOK)
 }
 func ChangePasswordRoute(c *fiber.Ctx) error {

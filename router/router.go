@@ -22,12 +22,13 @@ func InitalizeRoutes(router *fiber.App) {
 	auth.Post("/create", handlers.CreateUser)
 	auth.Post("/delete", handlers.DeleteUser)
 	auth.Post("/update", handlers.ChangePasswordRoute)
-	auth.Post("/user", handlers.GetUserInfo)
+	auth.Post("/user", middleware.AuthenticatedMiddleware, handlers.GetUserInfo)
 
-	product := router.Group("/product")
+	product := router.Group("/product", middleware.AuthenticatedMiddleware)
 	product.Post("/create", handlers.CreateProduct)
 	product.Post("/delete", handlers.DeleteProduct)
-	product.Post("/product", handlers.GetProduct)
+	product.Post("/products", handlers.GetProduct)
+	product.Post("/id/:id", handlers.GetProductById)
 	product.Post("/update", handlers.UpdateProduct)
 
 	router.Use(func(c *fiber.Ctx) error {
