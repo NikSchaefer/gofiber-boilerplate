@@ -130,36 +130,28 @@ func CreateUser(c *fiber.Ctx) error {
 	})
 	return c.Status(fiber.StatusOK).JSON(session)
 }
+
 func GetUserInfo(c *fiber.Ctx) error {
 	user := c.Locals("user").(User)
-	db := database.DB
-	var Products []model.Product = []model.Product{}
-	db.Model(&user).Association("Products").Find(&Products)
-	user.Products = Products
 	return c.JSON(user)
 }
+
 func DeleteUser(c *fiber.Ctx) error {
+	type DeleteUserRequest struct {
+		password string
+	}
 	db := database.DB
-	json := new(User)
+	json := new(DeleteUserRequest)
+	user := c.Locals("user").(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	empty := User{}
-	if json.Username == empty.Username || empty.Password == json.Password {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid Data Sent")
+	if !comparePasswords(user.Password, []byte(json.password)) {
+		return c.Status(fiber.StatusUnauthorized).SendString("Invalid Password")
 	}
-	found := User{}
-	query := User{Username: json.Username}
-	err := db.First(&found, &query).Error
-	if err == gorm.ErrRecordNotFound {
-		return c.Status(fiber.StatusNotFound).SendString("User Not Found")
-	}
-	if !comparePasswords(found.Password, []byte(json.Password)) {
-		return c.Status(fiber.StatusUnauthorized).SendString("Invalid Credentials")
-	}
-	db.Model(&found).Association("Sessions").Delete()
-	db.Model(&found).Association("Products").Delete()
-	db.Delete(&found)
+	db.Model(&user).Association("Sessions").Delete()
+	db.Model(&user).Association("Products").Delete()
+	db.Delete(&user)
 	c.ClearCookie("sessionid")
 	return c.SendStatus(fiber.StatusOK)
 }
