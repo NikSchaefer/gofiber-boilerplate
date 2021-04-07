@@ -3,6 +3,7 @@ module github.com/NikSchaefer/go-fiber
 go 1.16
 
 require (
+	github.com/badoux/checkmail v1.2.1 // indirect
 	github.com/gofiber/fiber/v2 v2.5.0
 	github.com/google/uuid v1.2.0
 	github.com/joho/godotenv v1.3.0

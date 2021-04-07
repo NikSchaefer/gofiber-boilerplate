@@ -6,6 +6,7 @@ import (
 
 	"github.com/NikSchaefer/go-fiber/database"
 	"github.com/NikSchaefer/go-fiber/model"
+	"github.com/badoux/checkmail"
 	"github.com/gofiber/fiber/v2"
 	guuid "github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -102,18 +103,23 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	empty := User{}
-	if json.Username == empty.Username || empty.Password == json.Password {
+	if json.Username == empty.Username || empty.Password == json.Password || empty.Email == json.Email {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid Data Sent")
 	}
 	pw := hashAndSalt([]byte(json.Password))
+	err := checkmail.ValidateFormat(json.Email)
+	if err != nil {
+		return c.Status(400).SendString("Invalid Email Format")
+	}
 	new := User{
 		Username: json.Username,
 		Password: pw,
+		Email:    json.Email,
 		ID:       guuid.New(),
 	}
 	found := User{}
 	query := User{Username: json.Username}
-	err := db.First(&found, &query).Error
+	err = db.First(&found, &query).Error
 	if err != gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusBadRequest).SendString("User Already Exists")
 	}
