@@ -77,7 +77,6 @@ func JsonMiddleware(c *fiber.Ctx) error {
 }
 
 // func AuthenticatedMiddleware(c *fiber.Ctx) error {
-// 	c.Accepts("application/json")
 // 	json := new(Session)
 // 	if err := c.BodyParser(json); err != nil {
 // 		return c.SendStatus(fiber.StatusBadRequest)
