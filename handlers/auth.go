@@ -92,7 +92,7 @@ func Logout(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func createUser(c *fiber.Ctx) error {
+func CreateUser(c *fiber.Ctx) error {
 	json := new(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -127,7 +127,7 @@ func createUser(c *fiber.Ctx) error {
 	})
 	return c.Status(fiber.StatusOK).JSON(session)
 }
-func getUser(c *fiber.Ctx) error {
+func GetUserInfo(c *fiber.Ctx) error {
 	json := new(Session)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -141,7 +141,7 @@ func getUser(c *fiber.Ctx) error {
 	user.Products = Products
 	return c.JSON(user)
 }
-func deleteUser(c *fiber.Ctx) error {
+func DeleteUser(c *fiber.Ctx) error {
 	json := new(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -165,7 +165,7 @@ func deleteUser(c *fiber.Ctx) error {
 	c.ClearCookie("sessionid")
 	return c.SendStatus(fiber.StatusOK)
 }
-func updateUser(c *fiber.Ctx) error {
+func UpdateUser(c *fiber.Ctx) error {
 	json := new(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -182,7 +182,7 @@ func updateUser(c *fiber.Ctx) error {
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
-func changePassword(c *fiber.Ctx) error {
+func ChangePasswordRoute(c *fiber.Ctx) error {
 	json := new(ChangePassword)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
