@@ -35,30 +35,27 @@ func GetUser(sessionid guuid.UUID) (User, int) {
 }
 
 func Login(c *fiber.Ctx) error {
+	type LoginRequest struct {
+		username string
+		password string
+	}
 	db := database.DB
-	json := new(User)
+	json := new(LoginRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	empty := User{}
-	if json.Username == empty.Username || empty.Password == json.Password {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid Data Sent")
-	}
 
 	found := User{}
-	query := User{Username: json.Username}
+	query := User{Username: json.username}
 	err := db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusNotFound).SendString("User not Found")
 	}
-	if !comparePasswords(found.Password, []byte(json.Password)) {
+	if !comparePasswords(found.Password, []byte(json.password)) {
 		return c.Status(fiber.StatusBadRequest).SendString("Incorrect Password")
 	}
 	session := Session{UserRefer: found.ID, Expires: SessionExpires(), Sessionid: guuid.New()}
-	err = db.Create(&session).Error
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Creation Error")
-	}
+	db.Create(&session)
 	c.Cookie(&fiber.Cookie{
 		Name:     "sessionid",
 		Expires:  SessionExpires(),
@@ -70,13 +67,9 @@ func Login(c *fiber.Ctx) error {
 
 func Logout(c *fiber.Ctx) error {
 	db := database.DB
-
 	json := new(Session)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
-	}
-	if json.Sessionid == new(Session).Sessionid {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid Data Sent")
 	}
 	session := Session{}
 	query := Session{Sessionid: json.Sessionid}
@@ -95,18 +88,14 @@ func CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	empty := User{}
-	if json.Username == empty.Username || empty.Password == json.Password || empty.Email == json.Email {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid Data Sent")
-	}
-	pw := hashAndSalt([]byte(json.Password))
+	password := hashAndSalt([]byte(json.Password))
 	err := checkmail.ValidateFormat(json.Email)
 	if err != nil {
 		return c.Status(400).SendString("Invalid Email Format")
 	}
 	new := User{
 		Username: json.Username,
-		Password: pw,
+		Password: password,
 		Email:    json.Email,
 		ID:       guuid.New(),
 	}

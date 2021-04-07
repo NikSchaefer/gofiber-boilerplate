@@ -20,8 +20,8 @@ func InitalizeRoutes(router *fiber.App) {
 	auth.Post("/login", handlers.Login)
 	auth.Post("/logout", handlers.Logout)
 	auth.Post("/create", handlers.CreateUser)
-	auth.Post("/delete", handlers.DeleteUser)
-	auth.Post("/update", handlers.ChangePasswordRoute)
+	auth.Post("/delete", middleware.AuthenticatedMiddleware, handlers.DeleteUser)
+	auth.Post("/update", middleware.AuthenticatedMiddleware, handlers.ChangePassword)
 	auth.Post("/user", middleware.AuthenticatedMiddleware, handlers.GetUserInfo)
 
 	product := router.Group("/product", middleware.AuthenticatedMiddleware)
