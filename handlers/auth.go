@@ -13,11 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type ChangePassword struct {
-	User
-	NewPassword string `json:"sessionid"`
-}
-
 type User model.User
 type Session model.Session
 type Product model.Product
@@ -151,7 +146,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 	empty := User{}
 	if json.Username == empty.Username || empty.Password == json.Password {
-		return c.Status(401).SendString("Invalid Data Sent")
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid Data Sent")
 	}
 	found := User{}
 	query := User{Username: json.Username}
@@ -168,23 +163,22 @@ func DeleteUser(c *fiber.Ctx) error {
 	c.ClearCookie("sessionid")
 	return c.SendStatus(fiber.StatusOK)
 }
-func ChangePasswordRoute(c *fiber.Ctx) error {
+
+func ChangePassword(c *fiber.Ctx) error {
+	type ChangePasswordRequest struct {
+		newPassword string
+	}
 	db := database.DB
-	json := new(ChangePassword)
+	user := c.Locals("user").(User)
+	json := new(ChangePasswordRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	found := User{}
-	query := User{Username: json.Username}
-	err := db.First(&found, &query).Error
-	if err == gorm.ErrRecordNotFound {
-		return c.Status(fiber.StatusNotFound).SendString("User Not Found")
-	}
-	if !comparePasswords(found.Password, []byte(json.NewPassword)) {
+	if !comparePasswords(user.Password, []byte(json.newPassword)) {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid Password")
 	}
-	found.Password = hashAndSalt([]byte(json.Password))
-	db.Save(&found)
+	user.Password = hashAndSalt([]byte(json.newPassword))
+	db.Save(&user)
 	return c.SendStatus(fiber.StatusOK)
 }
 
