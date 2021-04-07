@@ -21,15 +21,15 @@ type User model.User
 type Session model.Session
 type Product model.Product
 
-var db *gorm.DB = database.DB
-
-func GetUser(sessionid guuid.UUID, db *gorm.DB) (User, int) {
+func GetUser(sessionid guuid.UUID) (User, int) {
+	db := database.DB
 	query := Session{Sessionid: sessionid}
 	found := Session{}
 	err := db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
 		return User{}, fiber.StatusNotFound
 	}
+
 	user := User{}
 	usrQuery := User{ID: found.UserRefer}
 	err = db.First(&user, &usrQuery).Error
@@ -39,8 +39,8 @@ func GetUser(sessionid guuid.UUID, db *gorm.DB) (User, int) {
 	return user, 0
 }
 
-
 func Login(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -74,6 +74,8 @@ func Login(c *fiber.Ctx) error {
 }
 
 func Logout(c *fiber.Ctx) error {
+	db := database.DB
+
 	json := new(Session)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -93,6 +95,8 @@ func Logout(c *fiber.Ctx) error {
 }
 
 func CreateUser(c *fiber.Ctx) error {
+	db := database.DB
+
 	json := new(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -128,20 +132,25 @@ func CreateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(session)
 }
 func GetUserInfo(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(Session)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	user, status := GetUser(json.Sessionid, db)
+
+	user, status := GetUser(json.Sessionid)
 	if status != 0 {
 		return c.SendStatus(status)
 	}
 	var Products []model.Product = []model.Product{}
+
 	db.Model(&user).Association("Products").Find(&Products)
 	user.Products = Products
+
 	return c.JSON(user)
 }
 func DeleteUser(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -166,6 +175,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 func UpdateUser(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(User)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
@@ -183,6 +193,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 func ChangePasswordRoute(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(ChangePassword)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
@@ -202,22 +213,13 @@ func ChangePasswordRoute(c *fiber.Ctx) error {
 }
 
 func hashAndSalt(pwd []byte) string {
-	// Use GenerateFromPassword to hash & salt pwd.
-	// MinCost is just an integer constant provided by the bcrypt
-	// package along with DefaultCost & MaxCost.
-	// The cost can be any value you want provided it isn't lower
-	// than the MinCost (4)
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
 	if err != nil {
 		fmt.Println(err)
 	}
-	// GenerateFromPassword returns a byte slice so we need to
-	// convert the bytes to a string and return it
 	return string(hash)
 }
 func comparePasswords(hashedPwd string, plainPwd []byte) bool {
-	// Since we'll be getting the hashed password from the DB it
-	// will be a string so we'll need to convert it to a byte slice
 	byteHash := []byte(hashedPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
 	return err == nil

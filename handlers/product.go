@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/NikSchaefer/go-fiber/database"
 	guuid "github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,11 +14,12 @@ type ProductRequest struct {
 }
 
 func CreateProduct(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(ProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	usr, status := GetUser(json.Sessionid, db)
+	usr, status := GetUser(json.Sessionid)
 	if status != 0 {
 		return c.SendStatus(status)
 	}
@@ -34,11 +36,12 @@ func CreateProduct(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 func GetProduct(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(ProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	usr, err := GetUser(json.Sessionid, db)
+	usr, err := GetUser(json.Sessionid)
 	if err != 0 {
 		return c.SendStatus(err)
 	}
@@ -47,11 +50,12 @@ func GetProduct(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(Products)
 }
 func UpdateProduct(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(ProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	usr, status := GetUser(json.Sessionid, db)
+	usr, status := GetUser(json.Sessionid)
 	if status != 0 {
 		return c.SendStatus(status)
 	}
@@ -69,11 +73,12 @@ func UpdateProduct(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 func DeleteProduct(c *fiber.Ctx) error {
+	db := database.DB
 	json := new(ProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	usr, status := GetUser(json.Sessionid, db)
+	usr, status := GetUser(json.Sessionid)
 	if status != 0 {
 		return c.SendStatus(status)
 	}
