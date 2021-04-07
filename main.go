@@ -16,9 +16,9 @@ func main() {
 	// Set Env variables for
 	// PORT=3000
 	// DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
-	// If deploying with Heroku these will be 
+	// If deploying with Heroku these will be
 	// automatically set provided you have created a db add on
-	
+
 	godotenv.Load()
 	router := fiber.New()
 	router.Use(cors.New(cors.Config{
@@ -47,6 +47,10 @@ func main() {
 	})
 
 	api.Initalize(router, db)
+
+	router.Use(func(c *fiber.Ctx) error {
+		return c.SendStatus(404) // => 404 "Not Found"
+	})
 
 	log.Fatal(router.Listen(":" + os.Getenv("PORT")))
 }
