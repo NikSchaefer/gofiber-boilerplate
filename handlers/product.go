@@ -8,14 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type ProductRequest struct {
-	Product
-	Sessionid guuid.UUID
-}
-
 func CreateProduct(c *fiber.Ctx) error {
 	db := database.DB
-	json := new(ProductRequest)
+	json := new(Product)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
@@ -32,13 +27,9 @@ func CreateProduct(c *fiber.Ctx) error {
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
-func GetProduct(c *fiber.Ctx) error {
+func GetProducts(c *fiber.Ctx) error {
 	db := database.DB
 	user := c.Locals("user").(User)
-	json := new(ProductRequest)
-	if err := c.BodyParser(json); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
 	Products := []Product{}
 	db.Model(&user).Association("Products").Find(&Products)
 	return c.Status(fiber.StatusOK).JSON(Products)
@@ -61,42 +52,63 @@ func GetProductById(c *fiber.Ctx) error {
 }
 
 func UpdateProduct(c *fiber.Ctx) error {
+	type UpdateProductRequest struct {
+		id    string
+		name  string
+		value string
+	}
 	db := database.DB
 	user := c.Locals("user").(User)
-	json := new(ProductRequest)
+	json := new(UpdateProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
+	id, err := guuid.Parse(json.id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid Id Format")
+	}
 	found := Product{}
 	query := Product{
-		Name:      json.Name,
+		ProductID: id,
 		UserRefer: user.ID,
 	}
-	err := db.First(&found, &query).Error
+	err = db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusUnauthorized).SendString("Product Not Found")
 	}
-	found.Value = json.Value
+	if json.name != "" {
+		found.Name = json.name
+	}
+	if json.value != "" {
+		found.Value = json.name
+	}
 	db.Save(&found)
 	return c.SendStatus(fiber.StatusOK)
 }
 func DeleteProduct(c *fiber.Ctx) error {
+	type DeleteProductRequest struct {
+		id string
+	}
 	db := database.DB
 	user := c.Locals("user").(User)
-	json := new(ProductRequest)
+	json := new(DeleteProductRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
+	id, err := guuid.Parse(json.id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid Id Format")
+	}
+
 	found := Product{}
 	query := Product{
-		Name:      json.Name,
+		ProductID: id,
 		UserRefer: user.ID,
 	}
-	err := db.First(&found, &query).Error
+	err = db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusNotFound).SendString("Product Not Found")
 	}
-	found.Value = json.Value
 	db.Delete(&found)
 	return c.SendStatus(fiber.StatusOK)
 }
