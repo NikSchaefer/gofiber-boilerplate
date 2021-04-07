@@ -29,4 +29,9 @@ func InitalizeRoutes(router *fiber.App) {
 	product.Post("/delete", handlers.DeleteProduct)
 	product.Post("/product", handlers.GetProduct)
 	product.Post("/update", handlers.UpdateProduct)
+
+	router.Use(func(c *fiber.Ctx) error {
+		return c.SendStatus(404) // => 404 "Not Found"
+	})
+
 }
