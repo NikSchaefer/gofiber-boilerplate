@@ -147,7 +147,7 @@ func DeleteUser(c *fiber.Ctx) error {
 
 func ChangePassword(c *fiber.Ctx) error {
 	type ChangePasswordRequest struct {
-		newPassword string
+		NewPassword string `json:"newPassword"`
 	}
 	db := database.DB
 	user := c.Locals("user").(User)
@@ -155,10 +155,10 @@ func ChangePassword(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	if !comparePasswords(user.Password, []byte(json.newPassword)) {
+	if !comparePasswords(user.Password, []byte(json.NewPassword)) {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid Password")
 	}
-	user.Password = hashAndSalt([]byte(json.newPassword))
+	user.Password = hashAndSalt([]byte(json.NewPassword))
 	db.Save(&user)
 	return c.SendStatus(fiber.StatusOK)
 }

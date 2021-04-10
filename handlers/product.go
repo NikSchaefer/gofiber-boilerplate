@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/NikSchaefer/go-fiber/database"
+	"github.com/NikSchaefer/go-fiber/model"
 	guuid "github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
@@ -29,9 +30,8 @@ func CreateProduct(c *fiber.Ctx) error {
 }
 func GetProducts(c *fiber.Ctx) error {
 	db := database.DB
-	user := c.Locals("user").(User)
 	Products := []Product{}
-	db.Model(&user).Association("Products").Find(&Products)
+	db.Model(&model.Product{}).Find(&Products)
 	return c.Status(fiber.StatusOK).JSON(Products)
 }
 func GetProductById(c *fiber.Ctx) error {
@@ -53,9 +53,9 @@ func GetProductById(c *fiber.Ctx) error {
 
 func UpdateProduct(c *fiber.Ctx) error {
 	type UpdateProductRequest struct {
-		id    string
-		name  string
-		value string
+		Name      string `json:"name"`
+		Value     string `json:"value"`
+		Sessionid string `json:"sessionid"`
 	}
 	db := database.DB
 	user := c.Locals("user").(User)
@@ -63,7 +63,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	id, err := guuid.Parse(json.id)
+	id, err := guuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid Id Format")
 	}
@@ -76,26 +76,19 @@ func UpdateProduct(c *fiber.Ctx) error {
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusUnauthorized).SendString("Product Not Found")
 	}
-	if json.name != "" {
-		found.Name = json.name
+	if json.Name != "" {
+		found.Name = json.Name
 	}
-	if json.value != "" {
-		found.Value = json.name
+	if json.Value != "" {
+		found.Value = json.Value
 	}
 	db.Save(&found)
 	return c.SendStatus(fiber.StatusOK)
 }
 func DeleteProduct(c *fiber.Ctx) error {
-	type DeleteProductRequest struct {
-		id string
-	}
 	db := database.DB
 	user := c.Locals("user").(User)
-	json := new(DeleteProductRequest)
-	if err := c.BodyParser(json); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
-	}
-	id, err := guuid.Parse(json.id)
+	id, err := guuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid Id Format")
 	}

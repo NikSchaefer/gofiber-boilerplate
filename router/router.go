@@ -16,20 +16,20 @@ func InitalizeRoutes(router *fiber.App) {
 
 	router.Use(middleware.JsonMiddleware)
 
-	auth := router.Group("/auth")
+	auth := router.Group("/users")
+	auth.Post("/", handlers.CreateUser)
+	auth.Delete("/", middleware.AuthenticatedMiddleware, handlers.DeleteUser)
+	auth.Put("/", middleware.AuthenticatedMiddleware, handlers.ChangePassword)
 	auth.Post("/login", handlers.Login)
-	auth.Post("/logout", handlers.Logout)
-	auth.Post("/create", handlers.CreateUser)
-	auth.Post("/delete", middleware.AuthenticatedMiddleware, handlers.DeleteUser)
-	auth.Post("/update", middleware.AuthenticatedMiddleware, handlers.ChangePassword)
-	auth.Post("/user", middleware.AuthenticatedMiddleware, handlers.GetUserInfo)
+	auth.Delete("/logout", handlers.Logout)
+	auth.Get("/me", middleware.AuthenticatedMiddleware, handlers.GetUserInfo)
 
-	product := router.Group("/product", middleware.AuthenticatedMiddleware)
-	product.Post("/create", handlers.CreateProduct)
-	product.Post("/delete", handlers.DeleteProduct)
-	product.Post("/products", handlers.GetProducts)
-	product.Post("/id/:id", handlers.GetProductById)
-	product.Post("/update", handlers.UpdateProduct)
+	product := router.Group("/products", middleware.AuthenticatedMiddleware)
+	product.Post("/", handlers.CreateProduct)
+	product.Get("/", handlers.GetProducts)
+	product.Delete("/:id", handlers.DeleteProduct)
+	product.Get("/:id", handlers.GetProductById)
+	product.Put("/:id", handlers.UpdateProduct)
 
 	router.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404) // => 404 "Not Found"
