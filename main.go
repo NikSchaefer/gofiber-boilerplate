@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
-	_ "gorm.io/driver/postgres"
 )
 
 func main() {
@@ -19,7 +18,6 @@ func main() {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*", // comma format e.g. "localhost, nikschaefer.tech"
 		AllowHeaders: "Origin, Content-Type, Accept",
-		AllowMethods: "GET, POST",
 	}))
 
 	database.ConnectDB()
