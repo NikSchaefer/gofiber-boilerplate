@@ -36,8 +36,8 @@ func GetUser(sessionid guuid.UUID) (User, int) {
 
 func Login(c *fiber.Ctx) error {
 	type LoginRequest struct {
-		username string
-		password string
+		Username string `json:"username"`
+		Password string `json:"password"`
 	}
 	db := database.DB
 	json := new(LoginRequest)
@@ -46,12 +46,12 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	found := User{}
-	query := User{Username: json.username}
+	query := User{Username: json.Username}
 	err := db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusNotFound).SendString("User not Found")
 	}
-	if !comparePasswords(found.Password, []byte(json.password)) {
+	if !comparePasswords(found.Password, []byte(json.Password)) {
 		return c.Status(fiber.StatusBadRequest).SendString("Incorrect Password")
 	}
 	session := Session{UserRefer: found.ID, Expires: SessionExpires(), Sessionid: guuid.New()}
@@ -89,6 +89,7 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	password := hashAndSalt([]byte(json.Password))
+	fmt.Println(json.Password, password)
 	err := checkmail.ValidateFormat(json.Email)
 	if err != nil {
 		return c.Status(400).SendString("Invalid Email Format")
