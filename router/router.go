@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func InitalizeRoutes(router *fiber.App) {
+func Initalize(router *fiber.App) {
 
 	router.Use(middleware.Security)
 
