@@ -14,17 +14,17 @@ func InitalizeRoutes(router *fiber.App) {
 		return c.Status(200).SendString("Hello, World!")
 	})
 
-	router.Use(middleware.JsonMiddleware)
+	router.Use(middleware.Json)
 
 	users := router.Group("/users")
 	users.Post("/", handlers.CreateUser)
-	users.Delete("/", middleware.AuthenticatedMiddleware, handlers.DeleteUser)
-	users.Put("/", middleware.AuthenticatedMiddleware, handlers.ChangePassword)
-	users.Get("/", middleware.AuthenticatedMiddleware, handlers.GetUserInfo)
+	users.Delete("/", middleware.Authenticated, handlers.DeleteUser)
+	users.Put("/", middleware.Authenticated, handlers.ChangePassword)
+	users.Get("/", middleware.Authenticated, handlers.GetUserInfo)
 	users.Post("/login", handlers.Login)
 	users.Delete("/logout", handlers.Logout)
 
-	products := router.Group("/products", middleware.AuthenticatedMiddleware)
+	products := router.Group("/products", middleware.Authenticated)
 	products.Post("/", handlers.CreateProduct)
 	products.Get("/", handlers.GetProducts)
 	products.Delete("/:id", handlers.DeleteProduct)

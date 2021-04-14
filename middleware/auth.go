@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func AuthenticatedMiddleware(c *fiber.Ctx) error {
+func Authenticated(c *fiber.Ctx) error {
 	json := new(model.Session)
 	if err := c.BodyParser(json); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
