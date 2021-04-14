@@ -12,6 +12,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return fallback
+	}
+	return value
+}
+
 func main() {
 	godotenv.Load()
 	app := fiber.New()
@@ -24,7 +32,7 @@ func main() {
 
 	router.Initalize(app)
 
-	log.Fatal(app.Listen(":" + os.Getenv("PORT")))
+	log.Fatal(app.Listen(":" + getenv("PORT", "3000")))
 }
 
 // Set Env variables for
