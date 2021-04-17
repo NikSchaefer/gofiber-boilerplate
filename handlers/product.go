@@ -33,7 +33,7 @@ func CreateProduct(c *fiber.Ctx) error {
 func GetProducts(c *fiber.Ctx) error {
 	db := database.DB
 	Products := []Product{}
-	db.Model(&model.Product{}).Find(&Products)
+	db.Model(&model.Product{}).Order("ID asc").Find(&Products)
 	return c.Status(fiber.StatusOK).JSON(Products)
 }
 func GetProductById(c *fiber.Ctx) error {
