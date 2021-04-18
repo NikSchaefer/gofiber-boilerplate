@@ -5,12 +5,10 @@ import (
 
 	"github.com/NikSchaefer/go-fiber/database"
 	"github.com/NikSchaefer/go-fiber/model"
-	// guuid "github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
-
 func CreateProduct(c *fiber.Ctx) error {
 	db := database.DB
 	json := new(Product)
@@ -19,7 +17,6 @@ func CreateProduct(c *fiber.Ctx) error {
 	}
 	user := c.Locals("user").(User)
 	newProduct := Product{
-		// ProductID: guuid.New(),
 		UserRefer: user.ID,
 		Name:      json.Name,
 		Value:     json.Value,
@@ -33,7 +30,7 @@ func CreateProduct(c *fiber.Ctx) error {
 func GetProducts(c *fiber.Ctx) error {
 	db := database.DB
 	Products := []Product{}
-	db.Model(&model.Product{}).Order("ID asc").Find(&Products)
+	db.Model(&model.Product{}).Order("ID asc").Limit(100).Find(&Products)
 	return c.Status(fiber.StatusOK).JSON(Products)
 }
 func GetProductById(c *fiber.Ctx) error {
@@ -95,10 +92,9 @@ func DeleteProduct(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid id format")
 	}
-
 	found := Product{}
 	query := Product{
-		ID: id,
+		ID:        id,
 		UserRefer: user.ID,
 	}
 	err = db.First(&found, &query).Error
