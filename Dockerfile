@@ -1,4 +1,3 @@
-# Building the binary of the App
 FROM golang:1.16 AS build
 
 WORKDIR /go/src/fiber
