@@ -40,5 +40,3 @@ func main() {
 // PORT=3000
 // DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
 // *
-// If deploying with Heroku these will be
-// automatically set provided you have created a db add on
