@@ -1,4 +1,6 @@
 *.env
 .docker_build/
 *.exe
-/data
+docker-compose.yml
+main
+*.zip

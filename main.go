@@ -1,26 +1,22 @@
 package main
 
 import (
-	"log"
-	"os"
+	"context"
 
 	"github.com/NikSchaefer/go-fiber/database"
 	"github.com/NikSchaefer/go-fiber/router"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	adapter "github.com/awslabs/aws-lambda-go-api-proxy/fiber"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 )
 
-func getenv(key, fallback string) string {
-	value := os.Getenv(key)
-	if len(value) == 0 {
-		return fallback
-	}
-	return value
-}
+var fiberLambda *adapter.FiberLambda
 
-func main() {
+func init() {
 	godotenv.Load()
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
@@ -32,7 +28,14 @@ func main() {
 
 	router.Initalize(app)
 
-	log.Fatal(app.Listen(":" + getenv("PORT", "3000")))
+	fiberLambda = adapter.New(app)
+}
+func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// If no name is provided in the HTTP request body, throw an error
+	return fiberLambda.ProxyWithContext(ctx, req)
+}
+func main() {
+	lambda.Start(Handler)
 }
 
 /*
@@ -50,4 +53,14 @@ docker run --name database -d -p 5432:5432 -e POSTGRES_PASSWORD=password postgre
 DB_URL Variable for docker database
 *
 DATABASE_URL="host=localhost port=5432 user=postgres password=password dbname=postgres sslmode=disable"
+*/
+
+/*
+Generate Zip file for AWS Lambda
+
+$Env:GOOS = "linux"; $Env:GOARCH = "amd64"
+go build -o main
+~\Go\Bin\build-lambda-zip.exe -output main.zip main
+
+will generate a main.zip file to upload to lambad
 */
