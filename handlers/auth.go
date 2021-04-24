@@ -121,7 +121,7 @@ func CreateUser(c *fiber.Ctx) error {
 
 func GetUserInfo(c *fiber.Ctx) error {
 	user := c.Locals("user").(User)
-	return c.JSON(user)
+	return c.Status(200).JSON(user)
 }
 
 func DeleteUser(c *fiber.Ctx) error {
