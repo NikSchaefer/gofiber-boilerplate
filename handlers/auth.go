@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/NikSchaefer/go-fiber/database"
@@ -89,7 +88,6 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	password := hashAndSalt([]byte(json.Password))
-	fmt.Println(json.Password, password)
 	err := checkmail.ValidateFormat(json.Email)
 	if err != nil {
 		return c.Status(400).SendString("Invalid Email Format")
@@ -165,10 +163,7 @@ func ChangePassword(c *fiber.Ctx) error {
 }
 
 func hashAndSalt(pwd []byte) string {
-	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
-	if err != nil {
-		fmt.Println(err)
-	}
+	hash, _ := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
 	return string(hash)
 }
 func comparePasswords(hashedPwd string, plainPwd []byte) bool {
