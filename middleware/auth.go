@@ -2,14 +2,20 @@ package middleware
 
 import (
 	"github.com/NikSchaefer/go-fiber/handlers"
-	"github.com/NikSchaefer/go-fiber/model"
 	"github.com/gofiber/fiber/v2"
+	guuid "github.com/google/uuid"
 )
 
 func Authenticated(c *fiber.Ctx) error {
-	json := new(model.Session)
+	type AuthRequest struct {
+		Sessionid guuid.UUID `json:"sessionid"`
+	}
+	json := new(AuthRequest)
 	if err := c.BodyParser(json); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.Status(422).JSON(fiber.Map{
+			"err":  err,
+			"body": c.Body(),
+		})
 	}
 	user, status := handlers.GetUser(json.Sessionid)
 	if status != 0 {
