@@ -32,7 +32,7 @@ func Initalize(router *fiber.App) {
 	products.Put("/:id", handlers.UpdateProduct)
 
 	router.Use(func(c *fiber.Ctx) error {
-		return c.SendStatus(404) // => 404 "Not Found"
+		return c.Status(404).SendString("404 Not Found")
 	})
 
 }
