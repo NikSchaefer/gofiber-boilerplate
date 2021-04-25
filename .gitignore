@@ -1,5 +1,4 @@
 *.env
 .docker_build/
 *.exe
-docker-compose.yml
 /data

@@ -35,16 +35,19 @@ func main() {
 	log.Fatal(app.Listen(":" + getenv("PORT", "3000")))
 }
 
-// Set Env variables, PORT will auto set to 3000 if not set
-// *
-// PORT=3000
-// DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
-// *
+/*
+Set Env variables, PORT will auto set to 3000 if not set
+*
+PORT=3000
+DATABASE_URL="host=localhost port=5432 user=postgres password= dbname= sslmode=disable"
+*/
 
-// Docker Command for Postgres database
-// *
-// docker run --name database -d -p 5432:5432 -e POSTGRES_PASSWORD=password postgres:alpine
-// *
-/// DB_URL Variable for docker Command
-// *
-// DATABASE_URL="host=localhost port=5432 user=postgres password=password dbname=postgres sslmode=disable"
+/*
+Docker Command for Postgres database
+*
+docker run --name database -d -p 5432:5432 -e POSTGRES_PASSWORD=password postgres:alpine
+*
+DB_URL Variable for docker database
+*
+DATABASE_URL="host=localhost port=5432 user=postgres password=password dbname=postgres sslmode=disable"
+*/
