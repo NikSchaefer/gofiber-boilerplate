@@ -127,7 +127,7 @@ func GetUserInfo(c *fiber.Ctx) error {
 
 func DeleteUser(c *fiber.Ctx) error {
 	type DeleteUserRequest struct {
-		password string
+		Password string `json:"password"`
 	}
 	db := database.DB
 	data := new(DeleteUserRequest)
@@ -135,7 +135,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	if !comparePasswords(user.Password, []byte(data.password)) {
+	if !comparePasswords(user.Password, []byte(data.Password)) {
 		return c.Status(fiber.StatusUnauthorized).SendString("Invalid Password")
 	}
 	db.Model(&user).Association("Sessions").Delete()
@@ -147,6 +147,7 @@ func DeleteUser(c *fiber.Ctx) error {
 
 func ChangePassword(c *fiber.Ctx) error {
 	type ChangePasswordRequest struct {
+		Password    string `json:"password"`
 		NewPassword string `json:"newPassword"`
 	}
 	db := database.DB
@@ -155,7 +156,7 @@ func ChangePassword(c *fiber.Ctx) error {
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	if !comparePasswords(user.Password, []byte(data.NewPassword)) {
+	if !comparePasswords(user.Password, []byte(data.Password)) {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid Password")
 	}
 	user.Password = hashAndSalt([]byte(data.NewPassword))
