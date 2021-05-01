@@ -14,27 +14,36 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var App *fiber.App
 var fiberLambda *adapter.FiberLambda
 
 func init() {
 	godotenv.Load()
-	app := fiber.New()
-	app.Use(cors.New(cors.Config{
+	App = fiber.New()
+	App.Use(cors.New(cors.Config{
 		AllowOrigins: "*", // comma format e.g. "localhost, nikschaefer.tech"
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
 	database.ConnectDB()
 
-	router.Initalize(app)
+	router.Initalize(App)
 
-	fiberLambda = adapter.New(app)
+	fiberLambda = adapter.New(App)
 }
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// If no name is provided in the HTTP request body, throw an error
 	return fiberLambda.ProxyWithContext(ctx, req)
 }
+
+// func run(){
+// 	err := App.Listen(":3000")
+// 	if err != nil {
+// 		lambda.Start(Handler)
+// 	}
+// }
 func main() {
+	// run()
 	lambda.Start(Handler)
 }
 

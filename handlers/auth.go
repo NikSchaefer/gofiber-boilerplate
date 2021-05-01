@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/NikSchaefer/go-fiber/database"
@@ -39,18 +40,18 @@ func Login(c *fiber.Ctx) error {
 		Password string `json:"password"`
 	}
 	db := database.DB
-	json := new(LoginRequest)
-	if err := c.BodyParser(json); err != nil {
+	data := new(LoginRequest)
+	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
 	found := User{}
-	query := User{Username: json.Username}
+	query := User{Username: data.Username}
 	err := db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusNotFound).SendString("User not Found")
 	}
-	if !comparePasswords(found.Password, []byte(json.Password)) {
+	if !comparePasswords(found.Password, []byte(data.Password)) {
 		return c.Status(fiber.StatusBadRequest).SendString("Incorrect Password")
 	}
 	session := Session{UserRefer: found.ID, Expires: SessionExpires(), Sessionid: guuid.New()}
@@ -66,12 +67,12 @@ func Login(c *fiber.Ctx) error {
 
 func Logout(c *fiber.Ctx) error {
 	db := database.DB
-	json := new(Session)
-	if err := c.BodyParser(json); err != nil {
+	data := new(Session)
+	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	session := Session{}
-	query := Session{Sessionid: json.Sessionid}
+	query := Session{Sessionid: data.Sessionid}
 	err := db.First(&session, &query).Error
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusBadRequest).SendString("Session Not Found")
@@ -83,23 +84,23 @@ func Logout(c *fiber.Ctx) error {
 
 func CreateUser(c *fiber.Ctx) error {
 	db := database.DB
-	json := new(User)
-	if err := c.BodyParser(json); err != nil {
+	data := new(User)
+	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	password := hashAndSalt([]byte(json.Password))
-	err := checkmail.ValidateFormat(json.Email)
+	password := hashAndSalt([]byte(data.Password))
+	err := checkmail.ValidateFormat(data.Email)
 	if err != nil {
 		return c.Status(400).SendString("Invalid Email Format")
 	}
 	new := User{
-		Username: json.Username,
+		Username: data.Username,
 		Password: password,
-		Email:    json.Email,
+		Email:    data.Email,
 		ID:       guuid.New(),
 	}
 	found := User{}
-	query := User{Username: json.Username}
+	query := User{Username: data.Username}
 	err = db.First(&found, &query).Error
 	if err != gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusBadRequest).SendString("User Already Exists")
@@ -129,12 +130,12 @@ func DeleteUser(c *fiber.Ctx) error {
 		password string
 	}
 	db := database.DB
-	json := new(DeleteUserRequest)
+	data := new(DeleteUserRequest)
 	user := c.Locals("user").(User)
-	if err := c.BodyParser(json); err != nil {
+	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	if !comparePasswords(user.Password, []byte(json.password)) {
+	if !comparePasswords(user.Password, []byte(data.password)) {
 		return c.Status(fiber.StatusUnauthorized).SendString("Invalid Password")
 	}
 	db.Model(&user).Association("Sessions").Delete()
@@ -150,14 +151,14 @@ func ChangePassword(c *fiber.Ctx) error {
 	}
 	db := database.DB
 	user := c.Locals("user").(User)
-	json := new(ChangePasswordRequest)
-	if err := c.BodyParser(json); err != nil {
+	data := new(ChangePasswordRequest)
+	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	if !comparePasswords(user.Password, []byte(json.NewPassword)) {
+	if !comparePasswords(user.Password, []byte(data.NewPassword)) {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid Password")
 	}
-	user.Password = hashAndSalt([]byte(json.NewPassword))
+	user.Password = hashAndSalt([]byte(data.NewPassword))
 	db.Save(&user)
 	return c.SendStatus(fiber.StatusOK)
 }

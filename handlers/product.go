@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/NikSchaefer/go-fiber/database"
@@ -11,15 +12,15 @@ import (
 )
 func CreateProduct(c *fiber.Ctx) error {
 	db := database.DB
-	json := new(Product)
-	if err := c.BodyParser(json); err != nil {
+	data := new(Product)
+	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	user := c.Locals("user").(User)
 	newProduct := Product{
 		UserRefer: user.ID,
-		Name:      json.Name,
-		Value:     json.Value,
+		Name:      data.Name,
+		Value:     data.Value,
 	}
 	err := db.Create(&newProduct).Error
 	if err != nil {
@@ -57,8 +58,8 @@ func UpdateProduct(c *fiber.Ctx) error {
 	}
 	db := database.DB
 	user := c.Locals("user").(User)
-	json := new(UpdateProductRequest)
-	if err := c.BodyParser(json); err != nil {
+	data := new(UpdateProductRequest)
+	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
 	param := c.Params("id")
@@ -75,11 +76,11 @@ func UpdateProduct(c *fiber.Ctx) error {
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusUnauthorized).SendString("Product Not Found")
 	}
-	if json.Name != "" {
-		found.Name = json.Name
+	if data.Name != "" {
+		found.Name = data.Name
 	}
-	if json.Value != "" {
-		found.Value = json.Value
+	if data.Value != "" {
+		found.Value = data.Value
 	}
 	db.Save(&found)
 	return c.SendStatus(fiber.StatusOK)
