@@ -14,22 +14,21 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var App *fiber.App
 var fiberLambda *adapter.FiberLambda
 
 func init() {
 	godotenv.Load()
-	App = fiber.New()
-	App.Use(cors.New(cors.Config{
+	app := fiber.New()
+	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*", // comma format e.g. "localhost, nikschaefer.tech"
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
 	database.ConnectDB()
 
-	router.Initalize(App)
+	router.Initalize(app)
 
-	fiberLambda = adapter.New(App)
+	fiberLambda = adapter.New(app)
 }
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// If no name is provided in the HTTP request body, throw an error
@@ -37,7 +36,6 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 }
 
 func main() {
-	// run()
 	lambda.Start(Handler)
 }
 

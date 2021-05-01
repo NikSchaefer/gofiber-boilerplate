@@ -83,8 +83,13 @@ func Logout(c *fiber.Ctx) error {
 }
 
 func CreateUser(c *fiber.Ctx) error {
+	type CreateUserRequest struct {
+		Password string `json:"password"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
+	}
 	db := database.DB
-	data := new(User)
+	data := new(CreateUserRequest)
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
@@ -135,13 +140,6 @@ func DeleteUser(c *fiber.Ctx) error {
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
-	encrtyed, _ := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.MinCost)
-	return c.JSON(fiber.Map{
-		"msg":       bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password)),
-		"one":       user.Password,
-		"two":       data.Password,
-		"encrypted": encrtyed,
-	})
 	if !comparePasswords(user.Password, []byte(data.Password)) {
 		return c.Status(fiber.StatusUnauthorized).SendString("Invalid Password")
 	}
