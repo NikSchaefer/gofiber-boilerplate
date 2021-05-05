@@ -43,8 +43,7 @@ func Login(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Invalid JSON",
 		})
 	}
 
@@ -54,12 +53,14 @@ func Login(c *fiber.Ctx) error {
 	if err == gorm.ErrRecordNotFound {
 		return c.JSON(fiber.Map{
 			"code":    404,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "User not found",
 		})
 	}
 	if !comparePasswords(found.Password, []byte(json.Password)) {
-		return c.Status(fiber.StatusBadRequest).SendString("Incorrect Password")
+		return c.JSON(fiber.Map{
+			"code":    401,
+			"message": "Invalid Password",
+		})
 	}
 	session := Session{UserRefer: found.ID, Expires: SessionExpires(), Sessionid: guuid.New()}
 	db.Create(&session)
@@ -72,7 +73,6 @@ func Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 		"data":    session,
 	})
 }
@@ -83,8 +83,7 @@ func Logout(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Invalid JSON",
 		})
 	}
 	session := Session{}
@@ -93,8 +92,7 @@ func Logout(c *fiber.Ctx) error {
 	if err == gorm.ErrRecordNotFound {
 		return c.JSON(fiber.Map{
 			"code":    404,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Session not found",
 		})
 	}
 	db.Delete(&session)
@@ -102,7 +100,6 @@ func Logout(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 	})
 }
 
@@ -112,8 +109,7 @@ func CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Invalid JSON",
 		})
 	}
 	password := hashAndSalt([]byte(json.Password))
@@ -122,7 +118,6 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    400,
 			"message": "Invalid Email Address",
-			"sucess":  false,
 		})
 	}
 	new := User{
@@ -138,7 +133,6 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    400,
 			"message": "User already exists",
-			"sucess":  false,
 		})
 	}
 	db.Create(&new)
@@ -147,8 +141,7 @@ func CreateUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(fiber.Map{
 			"code":    500,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Creation Error",
 		})
 	}
 	c.Cookie(&fiber.Cookie{
@@ -160,14 +153,13 @@ func CreateUser(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 		"data":    session,
 	})
 }
 
 func GetUserInfo(c *fiber.Ctx) error {
 	user := c.Locals("user").(User)
-	return c.Status(200).JSON(user)
+	return c.JSON(user)
 }
 
 func DeleteUser(c *fiber.Ctx) error {
@@ -180,15 +172,13 @@ func DeleteUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Invalid JSON",
 		})
 	}
 	if !comparePasswords(user.Password, []byte(json.password)) {
 		return c.JSON(fiber.Map{
 			"code":    401,
 			"message": "Invalid Password",
-			"sucess":  false,
 		})
 	}
 	db.Model(&user).Association("Sessions").Delete()
@@ -198,7 +188,6 @@ func DeleteUser(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 	})
 }
 
@@ -213,15 +202,13 @@ func ChangePassword(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Invalid JSON",
 		})
 	}
 	if !comparePasswords(user.Password, []byte(json.Password)) {
 		return c.JSON(fiber.Map{
 			"code":    401,
 			"message": "Invalid Password",
-			"sucess":  false,
 		})
 	}
 	user.Password = hashAndSalt([]byte(json.NewPassword))
@@ -229,7 +216,6 @@ func ChangePassword(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 	})
 }
 

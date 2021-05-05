@@ -16,8 +16,7 @@ func CreateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Invalid JSON",
 		})
 	}
 	user := c.Locals("user").(User)
@@ -33,7 +32,6 @@ func CreateProduct(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 	})
 }
 func GetProducts(c *fiber.Ctx) error {
@@ -43,7 +41,6 @@ func GetProducts(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 		"data":    Products,
 	})
 }
@@ -55,7 +52,6 @@ func GetProductById(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    400,
 			"message": "Invalid ID Format",
-			"sucess":  false,
 		})
 	}
 	product := Product{}
@@ -65,7 +61,6 @@ func GetProductById(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    404,
 			"message": "Product not found",
-			"sucess":  false,
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(product)
@@ -83,8 +78,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Invalid JSON",
 		})
 	}
 	param := c.Params("id")
@@ -93,7 +87,6 @@ func UpdateProduct(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    400,
 			"message": "Invalid ID format",
-			"sucess":  false,
 		})
 	}
 	found := Product{}
@@ -106,7 +99,6 @@ func UpdateProduct(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    404,
 			"message": "Product not found",
-			"sucess":  false,
 		})
 	}
 	if json.Name != "" {
@@ -119,7 +111,6 @@ func UpdateProduct(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 	})
 }
 func DeleteProduct(c *fiber.Ctx) error {
@@ -131,7 +122,6 @@ func DeleteProduct(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    400,
 			"message": "Invalid ID format",
-			"sucess":  false,
 		})
 	}
 	found := Product{}
@@ -144,13 +134,11 @@ func DeleteProduct(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    400,
 			"message": "Product not found",
-			"sucess":  false,
 		})
 	}
 	db.Delete(&found)
 	return c.JSON(fiber.Map{
 		"code":    200,
 		"message": nil,
-		"sucess":  true,
 	})
 }

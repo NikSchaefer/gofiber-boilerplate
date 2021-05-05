@@ -11,8 +11,7 @@ func Authenticated(c *fiber.Ctx) error {
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
-			"message": err.Error(),
-			"sucess":  false,
+			"message": "Invalid Session Format",
 		})
 	}
 	user, status := handlers.GetUser(json.Sessionid)
@@ -20,7 +19,6 @@ func Authenticated(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"code":    status,
 			"message": "404: not found",
-			"sucess":  false,
 		})
 	}
 	c.Locals("user", user)
