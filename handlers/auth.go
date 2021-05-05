@@ -72,7 +72,7 @@ func Login(c *fiber.Ctx) error {
 	})
 	return c.JSON(fiber.Map{
 		"code":    200,
-		"message": nil,
+		"message": "sucess",
 		"data":    session,
 	})
 }
@@ -99,7 +99,7 @@ func Logout(c *fiber.Ctx) error {
 	c.ClearCookie("sessionid")
 	return c.JSON(fiber.Map{
 		"code":    200,
-		"message": nil,
+		"message": "sucess",
 	})
 }
 
@@ -158,7 +158,7 @@ func CreateUser(c *fiber.Ctx) error {
 	})
 	return c.JSON(fiber.Map{
 		"code":    200,
-		"message": nil,
+		"message": "sucess",
 		"data":    session,
 	})
 }
@@ -193,7 +193,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	c.ClearCookie("sessionid")
 	return c.JSON(fiber.Map{
 		"code":    200,
-		"message": nil,
+		"message": "sucess",
 	})
 }
 
@@ -221,7 +221,7 @@ func ChangePassword(c *fiber.Ctx) error {
 	db.Save(&user)
 	return c.JSON(fiber.Map{
 		"code":    200,
-		"message": nil,
+		"message": "sucess",
 	})
 }
 
