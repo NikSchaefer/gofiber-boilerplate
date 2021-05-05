@@ -104,8 +104,14 @@ func Logout(c *fiber.Ctx) error {
 }
 
 func CreateUser(c *fiber.Ctx) error {
+	type CreateUserRequest struct {
+		Password string `json:"password"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
+	}
+
 	db := database.DB
-	json := new(User)
+	json := new(CreateUserRequest)
 	if err := c.BodyParser(json); err != nil {
 		return c.JSON(fiber.Map{
 			"code":    400,
