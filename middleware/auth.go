@@ -16,6 +16,7 @@ func Authenticated(c *fiber.Ctx) error {
 	body := c.Body()
 	if err := json.Unmarshal(body, &data); err != nil {
 		return c.JSON(fiber.Map{
+			"code":    400,
 			"message": "Invalid JSON Sent",
 		})
 	}

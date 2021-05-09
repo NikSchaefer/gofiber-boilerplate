@@ -10,11 +10,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
+
 func CreateProduct(c *fiber.Ctx) error {
 	db := database.DB
 	data := new(Product)
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid JSON Sent",
+		})
 	}
 	user := c.Locals("user").(User)
 	newProduct := Product{
@@ -24,15 +28,25 @@ func CreateProduct(c *fiber.Ctx) error {
 	}
 	err := db.Create(&newProduct).Error
 	if err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"code":    500,
+			"message": "Internal Server Error",
+		})
 	}
-	return c.SendStatus(fiber.StatusOK)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+	})
 }
 func GetProducts(c *fiber.Ctx) error {
 	db := database.DB
 	Products := []Product{}
 	db.Model(&model.Product{}).Order("ID asc").Limit(100).Find(&Products)
-	return c.Status(fiber.StatusOK).JSON(Products)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+		"data":    Products,
+	})
 }
 func GetProductById(c *fiber.Ctx) error {
 	db := database.DB
@@ -47,7 +61,11 @@ func GetProductById(c *fiber.Ctx) error {
 	if err == gorm.ErrRecordNotFound {
 		return c.Status(fiber.StatusNotFound).SendString("Not Found")
 	}
-	return c.Status(fiber.StatusOK).JSON(product)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+		"data":    product,
+	})
 }
 
 func UpdateProduct(c *fiber.Ctx) error {
@@ -60,12 +78,18 @@ func UpdateProduct(c *fiber.Ctx) error {
 	user := c.Locals("user").(User)
 	data := new(UpdateProductRequest)
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid JSON Sent",
+		})
 	}
 	param := c.Params("id")
 	id, err := strconv.Atoi(param)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid id format")
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid ID Format",
+		})
 	}
 	found := Product{}
 	query := Product{
@@ -74,7 +98,10 @@ func UpdateProduct(c *fiber.Ctx) error {
 	}
 	err = db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
-		return c.Status(fiber.StatusUnauthorized).SendString("Product Not Found")
+		return c.JSON(fiber.Map{
+			"code":    401,
+			"message": "Product Not Found",
+		})
 	}
 	if data.Name != "" {
 		found.Name = data.Name
@@ -83,7 +110,10 @@ func UpdateProduct(c *fiber.Ctx) error {
 		found.Value = data.Value
 	}
 	db.Save(&found)
-	return c.SendStatus(fiber.StatusOK)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+	})
 }
 func DeleteProduct(c *fiber.Ctx) error {
 	db := database.DB
@@ -103,5 +133,8 @@ func DeleteProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("Product Not Found")
 	}
 	db.Delete(&found)
-	return c.SendStatus(fiber.StatusOK)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+	})
 }

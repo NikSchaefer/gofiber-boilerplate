@@ -42,7 +42,10 @@ func Login(c *fiber.Ctx) error {
 	db := database.DB
 	data := new(LoginRequest)
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid JSON Sent",
+		})
 	}
 
 	found := User{}
@@ -52,7 +55,10 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("User not Found")
 	}
 	if !comparePasswords(found.Password, []byte(data.Password)) {
-		return c.Status(fiber.StatusBadRequest).SendString("Incorrect Password")
+		return c.JSON(fiber.Map{
+			"code":    401,
+			"message": "Invalid Password",
+		})
 	}
 	session := Session{UserRefer: found.ID, Expires: SessionExpires(), Sessionid: guuid.New()}
 	db.Create(&session)
@@ -62,24 +68,37 @@ func Login(c *fiber.Ctx) error {
 		Value:    session.Sessionid.String(),
 		HTTPOnly: true,
 	})
-	return c.Status(fiber.StatusOK).JSON(session)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+		"data":    session,
+	})
 }
 
 func Logout(c *fiber.Ctx) error {
 	db := database.DB
 	data := new(Session)
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid JSON Sent",
+		})
 	}
 	session := Session{}
 	query := Session{Sessionid: data.Sessionid}
 	err := db.First(&session, &query).Error
 	if err == gorm.ErrRecordNotFound {
-		return c.Status(fiber.StatusBadRequest).SendString("Session Not Found")
+		return c.JSON(fiber.Map{
+			"code":    404,
+			"message": "Session Not Found",
+		})
 	}
 	db.Delete(&session)
 	c.ClearCookie("sessionid")
-	return c.SendStatus(fiber.StatusOK)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+	})
 }
 
 func CreateUser(c *fiber.Ctx) error {
@@ -91,12 +110,18 @@ func CreateUser(c *fiber.Ctx) error {
 	db := database.DB
 	data := new(CreateUserRequest)
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid JSON Sent",
+		})
 	}
 	password := hashAndSalt([]byte(data.Password))
 	err := checkmail.ValidateFormat(data.Email)
 	if err != nil {
-		return c.Status(400).SendString("Invalid Email Format")
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid Email Format",
+		})
 	}
 	new := User{
 		Username: data.Username,
@@ -108,13 +133,19 @@ func CreateUser(c *fiber.Ctx) error {
 	query := User{Username: data.Username}
 	err = db.First(&found, &query).Error
 	if err != gorm.ErrRecordNotFound {
-		return c.Status(fiber.StatusBadRequest).SendString("User Already Exists")
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "User Already Exists",
+		})
 	}
 	db.Create(&new)
 	session := Session{UserRefer: new.ID, Sessionid: guuid.New()}
 	err = db.Create(&session).Error
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Creation Error")
+		return c.JSON(fiber.Map{
+			"code":    500,
+			"message": "Internal Server Error",
+		})
 	}
 	c.Cookie(&fiber.Cookie{
 		Name:     "sessionid",
@@ -122,12 +153,20 @@ func CreateUser(c *fiber.Ctx) error {
 		Value:    session.Sessionid.String(),
 		HTTPOnly: true,
 	})
-	return c.Status(fiber.StatusOK).JSON(session)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+		"data":    session,
+	})
 }
 
 func GetUserInfo(c *fiber.Ctx) error {
 	user := c.Locals("user").(User)
-	return c.Status(200).JSON(user)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+		"data":    user,
+	})
 }
 
 func DeleteUser(c *fiber.Ctx) error {
@@ -138,16 +177,25 @@ func DeleteUser(c *fiber.Ctx) error {
 	data := new(DeleteUserRequest)
 	user := c.Locals("user").(User)
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid JSON Sent",
+		})
 	}
 	if !comparePasswords(user.Password, []byte(data.Password)) {
-		return c.Status(fiber.StatusUnauthorized).SendString("Invalid Password")
+		return c.JSON(fiber.Map{
+			"code":    401,
+			"message": "Invalid Password",
+		})
 	}
 	db.Model(&user).Association("Sessions").Delete()
 	db.Model(&user).Association("Products").Delete()
 	db.Delete(&user)
 	c.ClearCookie("sessionid")
-	return c.SendStatus(fiber.StatusOK)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+	})
 }
 
 func ChangePassword(c *fiber.Ctx) error {
@@ -159,14 +207,23 @@ func ChangePassword(c *fiber.Ctx) error {
 	user := c.Locals("user").(User)
 	data := new(ChangePasswordRequest)
 	if err := json.Unmarshal(c.Body(), &data); err != nil {
-		return c.SendStatus(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"code":    400,
+			"message": "Invalid JSON Sent",
+		})
 	}
 	if !comparePasswords(user.Password, []byte(data.Password)) {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid Password")
+		return c.JSON(fiber.Map{
+			"code":    401,
+			"message": "Invalid Password",
+		})
 	}
 	user.Password = hashAndSalt([]byte(data.NewPassword))
 	db.Save(&user)
-	return c.SendStatus(fiber.StatusOK)
+	return c.JSON(fiber.Map{
+		"code":    200,
+		"message": "sucess",
+	})
 }
 
 func hashAndSalt(pwd []byte) string {
