@@ -16,21 +16,21 @@ type User model.User
 type Session model.Session
 type Product model.Product
 
-func GetUser(sessionid guuid.UUID) (User, int) {
+func GetUser(sessionid guuid.UUID) (User, error) {
 	db := database.DB
 	query := Session{Sessionid: sessionid}
 	found := Session{}
 	err := db.First(&found, &query).Error
 	if err == gorm.ErrRecordNotFound {
-		return User{}, fiber.StatusNotFound
+		return User{}, err
 	}
 	user := User{}
 	usrQuery := User{ID: found.UserRefer}
 	err = db.First(&user, &usrQuery).Error
 	if err == gorm.ErrRecordNotFound {
-		return User{}, fiber.StatusNotFound
+		return User{}, err
 	}
-	return user, 0
+	return user, nil
 }
 
 func Login(c *fiber.Ctx) error {

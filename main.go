@@ -24,7 +24,7 @@ func main() {
 	godotenv.Load()
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*", // comma format e.g. "localhost, nikschaefer.tech"
+		AllowOrigins: "*", // comma string format e.g. "localhost, nikschaefer.tech"
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
