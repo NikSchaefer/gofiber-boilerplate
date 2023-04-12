@@ -101,13 +101,63 @@ stop and remove container
 ## Recommended 🙌
 run a postgres databse in docker and use the [fiber command line](https://github.com/gofiber/cli) to hot reload your application. Note: you can hot reload using docker or the fiber command line
 
-# Dependencies 📦
+# API Documentation 📖
+This project provides a batteries included REST API that allows the user to interact with a PostgreSQL database. The available endpoints are listed below:
 
-Install dependencies with go
+### User Endpoints
 
-```sh
-go mod tidy
-```
+`POST /users/`
+Create a new user. The request should include a JSON payload with the following fields:
+
+- `username`: a string containing the user's username.
+- `password`: a string containing the user's password.
+
+`DELETE /users/`
+Delete the user. This endpoint requires the user to be authenticated.
+
+`PUT /users/`
+Change the user's password. This endpoint requires the user to be authenticated. The request should include a JSON payload with the following fields:
+
+- `oldPassword`: a string containing the user's current password.
+- `newPassword`: a string containing the user's new password.
+
+`POST /users/me`
+Get information about the user. This endpoint requires the user to be authenticated.
+
+`POST /users/login`
+Log in the user. The request should include a JSON payload with the following fields:
+
+- `username`: a string containing the user's username.
+- `password`: a string containing the user's password.
+
+`DELETE /users/logout`
+Log out the user. This endpoint requires the user to be authenticated.
+
+### Product Endpoints
+
+`POST /products/`
+Create a new product. This endpoint requires the user to be authenticated. The request should include a JSON payload with the following fields:
+
+- `name`: a string containing the name of the product.
+- `description`: a string containing the description of the product.
+- `price`: a float64 containing the price of the product.
+
+`POST /products/all`
+Get a list of all products.
+
+`DELETE /products/:id`
+Delete a product by ID. This endpoint requires the user to be authenticated.
+
+`POST /products/:id`
+Get a product by ID.
+
+`PUT /products/:id`
+Update a product by ID. This endpoint requires the user to be authenticated. The request should include a JSON payload with the following fields:
+
+- `name`: a string containing the new name of the product.
+- `description`: a string containing the new description of the product.
+- `price`: a float64 containing the new price of the product.
+If you need more information about the request and response of each endpoint, please check the corresponding function in the handlers folder.
 
 # License 📜
 
