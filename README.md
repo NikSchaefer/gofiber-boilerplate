@@ -1,7 +1,7 @@
 # 👋 Go-Fiber Boilerplate
 Golang Rest API boilerplate built with GORM, Go-Fiber, and a PostgreSQL database. Running in a docker container with Hot Reload.
 
-## 🚀 Quickstart
+## Quickstart 🚀
 To quickly get started with the Go-Fiber Boilerplate, follow these steps:
 
 1. Clone the repository:
