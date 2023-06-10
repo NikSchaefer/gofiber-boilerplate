@@ -6,13 +6,13 @@ To quickly get started with the Go-Fiber Boilerplate, follow these steps:
 
 1. Clone the repository:
 
-```sh
+```bash
 git clone https://github.com/NikSchaefer/go-fiber
 ```
 
 2. Install Dependencies
 
-```sh
+```bash
 cd go-fiber-boilerplate
 go mod tidy
 ```
@@ -24,7 +24,7 @@ DATABASE_URL="host=localhost port=5432 user=postgres password=password dbname=po
 ```
 
 4. Start the project
-```sh
+```bash
 go run main.go
 ```
 
