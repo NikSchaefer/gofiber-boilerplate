@@ -19,7 +19,7 @@ go mod tidy
 
 3. Connect the database: Create a `.env` file and put in a connection string
 
-```env
+```bash
 DATABASE_URL="host=localhost port=5432 user=postgres password=password dbname=postgres sslmode=disable"
 ```
 
