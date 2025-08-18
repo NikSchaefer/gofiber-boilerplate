@@ -28,7 +28,7 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
-	database.ConnectDB()
+	database.InitializeDB(true)
 
 	router.Initalize(app)
 	log.Fatal(app.Listen(":" + getenv("PORT", "3000")))
