@@ -8,9 +8,125 @@ import (
 )
 
 var (
+	// AccountsColumns holds the columns for the "accounts" table.
+	AccountsColumns = []*schema.Column{
+		{Name: "oid", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"password", "google", "apple"}},
+		{Name: "password_hash", Type: field.TypeBytes, Nullable: true, Size: 255},
+		{Name: "provider_id", Type: field.TypeString, Unique: true, Nullable: true, Size: 255},
+		{Name: "user_accounts", Type: field.TypeInt, Nullable: true},
+	}
+	// AccountsTable holds the schema information for the "accounts" table.
+	AccountsTable = &schema.Table{
+		Name:       "accounts",
+		Columns:    AccountsColumns,
+		PrimaryKey: []*schema.Column{AccountsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "accounts_users_accounts",
+				Columns:    []*schema.Column{AccountsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// OtPsColumns holds the columns for the "ot_ps" table.
+	OtPsColumns = []*schema.Column{
+		{Name: "oid", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "code", Type: field.TypeString, Size: 255},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"login", "password_reset"}, Default: "login"},
+		{Name: "used", Type: field.TypeBool, Default: false},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "user_otps", Type: field.TypeInt},
+	}
+	// OtPsTable holds the schema information for the "ot_ps" table.
+	OtPsTable = &schema.Table{
+		Name:       "ot_ps",
+		Columns:    OtPsColumns,
+		PrimaryKey: []*schema.Column{OtPsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ot_ps_users_otps",
+				Columns:    []*schema.Column{OtPsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// ProductsColumns holds the columns for the "products" table.
+	ProductsColumns = []*schema.Column{
+		{Name: "oid", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2048},
+		{Name: "price", Type: field.TypeFloat64},
+		{Name: "quantity", Type: field.TypeInt},
+	}
+	// ProductsTable holds the schema information for the "products" table.
+	ProductsTable = &schema.Table{
+		Name:       "products",
+		Columns:    ProductsColumns,
+		PrimaryKey: []*schema.Column{ProductsColumns[0]},
+	}
+	// ProfilesColumns holds the columns for the "profiles" table.
+	ProfilesColumns = []*schema.Column{
+		{Name: "oid", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "avatar_url", Type: field.TypeString, Nullable: true, Size: 2048},
+		{Name: "avatar_key", Type: field.TypeString, Nullable: true, Size: 255},
+		{Name: "birthday", Type: field.TypeTime, Nullable: true},
+		{Name: "user_profile", Type: field.TypeInt, Unique: true},
+	}
+	// ProfilesTable holds the schema information for the "profiles" table.
+	ProfilesTable = &schema.Table{
+		Name:       "profiles",
+		Columns:    ProfilesColumns,
+		PrimaryKey: []*schema.Column{ProfilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "profiles_users_profile",
+				Columns:    []*schema.Column{ProfilesColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// SessionsColumns holds the columns for the "sessions" table.
+	SessionsColumns = []*schema.Column{
+		{Name: "oid", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "expires", Type: field.TypeTime},
+		{Name: "user_sessions", Type: field.TypeInt},
+	}
+	// SessionsTable holds the schema information for the "sessions" table.
+	SessionsTable = &schema.Table{
+		Name:       "sessions",
+		Columns:    SessionsColumns,
+		PrimaryKey: []*schema.Column{SessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "sessions_users_sessions",
+				Columns:    []*schema.Column{SessionsColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "email", Type: field.TypeString, Unique: true, Size: 255},
+		{Name: "email_verified", Type: field.TypeBool, Default: false},
+		{Name: "phone_number", Type: field.TypeString, Unique: true, Nullable: true, Size: 255},
+		{Name: "phone_number_verified", Type: field.TypeBool, Default: false},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -20,9 +136,18 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AccountsTable,
+		OtPsTable,
+		ProductsTable,
+		ProfilesTable,
+		SessionsTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	AccountsTable.ForeignKeys[0].RefTable = UsersTable
+	OtPsTable.ForeignKeys[0].RefTable = UsersTable
+	ProfilesTable.ForeignKeys[0].RefTable = UsersTable
+	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 }

@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -11,13 +13,13 @@ type User struct {
 
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("email")
-			.Unique()
-			.NotEmpty()
-			.MaxLen(255)
-			.Immutable(),
-		field.Bool("email_verified")
-			.Default(false),
+		field.String("email").
+			Unique().
+			NotEmpty().
+			MaxLen(255).
+			Immutable(),
+		field.Bool("email_verified").
+			Default(false),
 		field.String("phone_number").
 			Optional().
 			Unique().
@@ -28,7 +30,25 @@ func (User) Fields() []ent.Field {
 }
 
 func (User) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("accounts", Account.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
+		edge.To("profile", Profile.Type).
+			Unique().
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
+		edge.To("sessions", Session.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
+		edge.To("otps", OTP.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
+	}
 }
 
 type Account struct {

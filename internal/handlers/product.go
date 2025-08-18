@@ -3,7 +3,7 @@ package handlers
 import (
 	"strconv"
 
-	"github.com/NikSchaefer/go-fiber/database"
+	"github.com/NikSchaefer/go-fiber/internal/database"
 	"github.com/NikSchaefer/go-fiber/model"
 
 	"github.com/gofiber/fiber/v2"

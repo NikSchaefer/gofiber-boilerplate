@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/NikSchaefer/go-fiber/database"
-	"github.com/NikSchaefer/go-fiber/router"
+	"github.com/NikSchaefer/go-fiber/internal/database"
+	"github.com/NikSchaefer/go-fiber/internal/router"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

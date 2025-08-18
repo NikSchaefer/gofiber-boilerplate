@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/NikSchaefer/go-fiber/handlers"
+	"github.com/NikSchaefer/go-fiber/internal/handlers"
 	"github.com/NikSchaefer/go-fiber/middleware"
 	"github.com/gofiber/fiber/v2"
 )

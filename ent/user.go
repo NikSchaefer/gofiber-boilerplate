@@ -8,15 +8,80 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/NikSchaefer/go-fiber/ent/profile"
 	"github.com/NikSchaefer/go-fiber/ent/user"
 )
 
 // User is the model entity for the User schema.
 type User struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID           int `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
+	// Email holds the value of the "email" field.
+	Email string `json:"email,omitempty"`
+	// EmailVerified holds the value of the "email_verified" field.
+	EmailVerified bool `json:"email_verified,omitempty"`
+	// PhoneNumber holds the value of the "phone_number" field.
+	PhoneNumber string `json:"phone_number,omitempty"`
+	// PhoneNumberVerified holds the value of the "phone_number_verified" field.
+	PhoneNumberVerified bool `json:"phone_number_verified,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges        UserEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Accounts holds the value of the accounts edge.
+	Accounts []*Account `json:"accounts,omitempty"`
+	// Profile holds the value of the profile edge.
+	Profile *Profile `json:"profile,omitempty"`
+	// Sessions holds the value of the sessions edge.
+	Sessions []*Session `json:"sessions,omitempty"`
+	// Otps holds the value of the otps edge.
+	Otps []*OTP `json:"otps,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [4]bool
+}
+
+// AccountsOrErr returns the Accounts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) AccountsOrErr() ([]*Account, error) {
+	if e.loadedTypes[0] {
+		return e.Accounts, nil
+	}
+	return nil, &NotLoadedError{edge: "accounts"}
+}
+
+// ProfileOrErr returns the Profile value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ProfileOrErr() (*Profile, error) {
+	if e.Profile != nil {
+		return e.Profile, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: profile.Label}
+	}
+	return nil, &NotLoadedError{edge: "profile"}
+}
+
+// SessionsOrErr returns the Sessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SessionsOrErr() ([]*Session, error) {
+	if e.loadedTypes[2] {
+		return e.Sessions, nil
+	}
+	return nil, &NotLoadedError{edge: "sessions"}
+}
+
+// OtpsOrErr returns the Otps value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) OtpsOrErr() ([]*OTP, error) {
+	if e.loadedTypes[3] {
+		return e.Otps, nil
+	}
+	return nil, &NotLoadedError{edge: "otps"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -24,8 +89,12 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case user.FieldEmailVerified, user.FieldPhoneNumberVerified:
+			values[i] = new(sql.NullBool)
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
+		case user.FieldEmail, user.FieldPhoneNumber:
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -47,6 +116,30 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case user.FieldEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field email", values[i])
+			} else if value.Valid {
+				_m.Email = value.String
+			}
+		case user.FieldEmailVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field email_verified", values[i])
+			} else if value.Valid {
+				_m.EmailVerified = value.Bool
+			}
+		case user.FieldPhoneNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field phone_number", values[i])
+			} else if value.Valid {
+				_m.PhoneNumber = value.String
+			}
+		case user.FieldPhoneNumberVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field phone_number_verified", values[i])
+			} else if value.Valid {
+				_m.PhoneNumberVerified = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -58,6 +151,26 @@ func (_m *User) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *User) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryAccounts queries the "accounts" edge of the User entity.
+func (_m *User) QueryAccounts() *AccountQuery {
+	return NewUserClient(_m.config).QueryAccounts(_m)
+}
+
+// QueryProfile queries the "profile" edge of the User entity.
+func (_m *User) QueryProfile() *ProfileQuery {
+	return NewUserClient(_m.config).QueryProfile(_m)
+}
+
+// QuerySessions queries the "sessions" edge of the User entity.
+func (_m *User) QuerySessions() *SessionQuery {
+	return NewUserClient(_m.config).QuerySessions(_m)
+}
+
+// QueryOtps queries the "otps" edge of the User entity.
+func (_m *User) QueryOtps() *OTPQuery {
+	return NewUserClient(_m.config).QueryOtps(_m)
 }
 
 // Update returns a builder for updating this User.
@@ -82,7 +195,18 @@ func (_m *User) Unwrap() *User {
 func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("email=")
+	builder.WriteString(_m.Email)
+	builder.WriteString(", ")
+	builder.WriteString("email_verified=")
+	builder.WriteString(fmt.Sprintf("%v", _m.EmailVerified))
+	builder.WriteString(", ")
+	builder.WriteString("phone_number=")
+	builder.WriteString(_m.PhoneNumber)
+	builder.WriteString(", ")
+	builder.WriteString("phone_number_verified=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PhoneNumberVerified))
 	builder.WriteByte(')')
 	return builder.String()
 }
