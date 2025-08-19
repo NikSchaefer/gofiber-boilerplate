@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/NikSchaefer/go-fiber/internal/database"
 	"github.com/NikSchaefer/go-fiber/internal/router"
@@ -29,10 +29,9 @@ func InitializeApp() *fiber.App {
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS,PATCH",
 	}))
 
-	app.Use(logger.New())
 	router.Initialize(&app)
 
-	fmt.Println("App initialized")
+	log.Println("App initialized")
 
 	return &app
 }
@@ -43,6 +42,6 @@ func main() {
 	defer database.CloseDB()
 	err := app.Listen(":8000")
 	if err != nil {
-		fmt.Println("Error starting server: ", err)
+		log.Fatal("Error starting server: ", err)
 	}
 }

@@ -57,22 +57,6 @@ var (
 			},
 		},
 	}
-	// ProductsColumns holds the columns for the "products" table.
-	ProductsColumns = []*schema.Column{
-		{Name: "oid", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString, Size: 255},
-		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2048},
-		{Name: "price", Type: field.TypeFloat64},
-		{Name: "quantity", Type: field.TypeInt},
-	}
-	// ProductsTable holds the schema information for the "products" table.
-	ProductsTable = &schema.Table{
-		Name:       "products",
-		Columns:    ProductsColumns,
-		PrimaryKey: []*schema.Column{ProductsColumns[0]},
-	}
 	// ProfilesColumns holds the columns for the "profiles" table.
 	ProfilesColumns = []*schema.Column{
 		{Name: "oid", Type: field.TypeUUID},
@@ -138,7 +122,6 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		OtPsTable,
-		ProductsTable,
 		ProfilesTable,
 		SessionsTable,
 		UsersTable,

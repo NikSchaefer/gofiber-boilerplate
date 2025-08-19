@@ -7,7 +7,6 @@ import (
 
 	"github.com/NikSchaefer/go-fiber/ent/account"
 	"github.com/NikSchaefer/go-fiber/ent/otp"
-	"github.com/NikSchaefer/go-fiber/ent/product"
 	"github.com/NikSchaefer/go-fiber/ent/profile"
 	"github.com/NikSchaefer/go-fiber/ent/schema"
 	"github.com/NikSchaefer/go-fiber/ent/session"
@@ -93,51 +92,6 @@ func init() {
 	otpDescID := otpMixinFields0[0].Descriptor()
 	// otp.DefaultID holds the default value on creation for the id field.
 	otp.DefaultID = otpDescID.Default.(func() uuid.UUID)
-	productMixin := schema.Product{}.Mixin()
-	productMixinFields0 := productMixin[0].Fields()
-	_ = productMixinFields0
-	productFields := schema.Product{}.Fields()
-	_ = productFields
-	// productDescCreatedAt is the schema descriptor for created_at field.
-	productDescCreatedAt := productMixinFields0[1].Descriptor()
-	// product.DefaultCreatedAt holds the default value on creation for the created_at field.
-	product.DefaultCreatedAt = productDescCreatedAt.Default.(func() time.Time)
-	// productDescUpdatedAt is the schema descriptor for updated_at field.
-	productDescUpdatedAt := productMixinFields0[2].Descriptor()
-	// product.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
-	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	product.UpdateDefaultUpdatedAt = productDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// productDescName is the schema descriptor for name field.
-	productDescName := productFields[0].Descriptor()
-	// product.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	product.NameValidator = func() func(string) error {
-		validators := productDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// productDescDescription is the schema descriptor for description field.
-	productDescDescription := productFields[1].Descriptor()
-	// product.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
-	product.DescriptionValidator = productDescDescription.Validators[0].(func(string) error)
-	// productDescPrice is the schema descriptor for price field.
-	productDescPrice := productFields[2].Descriptor()
-	// product.PriceValidator is a validator for the "price" field. It is called by the builders before save.
-	product.PriceValidator = productDescPrice.Validators[0].(func(float64) error)
-	// productDescID is the schema descriptor for id field.
-	productDescID := productMixinFields0[0].Descriptor()
-	// product.DefaultID holds the default value on creation for the id field.
-	product.DefaultID = productDescID.Default.(func() uuid.UUID)
 	profileMixin := schema.Profile{}.Mixin()
 	profileMixinFields0 := profileMixin[0].Fields()
 	_ = profileMixinFields0

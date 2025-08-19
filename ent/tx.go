@@ -16,8 +16,6 @@ type Tx struct {
 	Account *AccountClient
 	// OTP is the client for interacting with the OTP builders.
 	OTP *OTPClient
-	// Product is the client for interacting with the Product builders.
-	Product *ProductClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
 	// Session is the client for interacting with the Session builders.
@@ -157,7 +155,6 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.OTP = NewOTPClient(tx.config)
-	tx.Product = NewProductClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)

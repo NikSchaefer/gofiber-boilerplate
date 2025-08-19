@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NikSchaefer/go-fiber/ent/account"
 	"github.com/NikSchaefer/go-fiber/ent/otp"
-	"github.com/NikSchaefer/go-fiber/ent/product"
 	"github.com/NikSchaefer/go-fiber/ent/profile"
 	"github.com/NikSchaefer/go-fiber/ent/session"
 	"github.com/NikSchaefer/go-fiber/ent/user"
@@ -80,7 +79,6 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			account.Table: account.ValidColumn,
 			otp.Table:     otp.ValidColumn,
-			product.Table: product.ValidColumn,
 			profile.Table: profile.ValidColumn,
 			session.Table: session.ValidColumn,
 			user.Table:    user.ValidColumn,

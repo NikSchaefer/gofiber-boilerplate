@@ -12,9 +12,6 @@ type Account func(*sql.Selector)
 // OTP is the predicate function for otp builders.
 type OTP func(*sql.Selector)
 
-// Product is the predicate function for product builders.
-type Product func(*sql.Selector)
-
 // Profile is the predicate function for profile builders.
 type Profile func(*sql.Selector)
 
