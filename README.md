@@ -4,14 +4,14 @@
 
 ## ✨ Features
 
-- 🔐 **Authentication & Authorization** - JWT-based sessions with OAuth support
-- 📧 **Email & SMS Integration** - Resend and Twilio integration
-- 📊 **Analytics** - PostHog integration for user analytics
-- 🗄️ **Database** - PostgreSQL with Ent ORM for type-safe queries
-- 🐳 **Docker Support** - Multi-stage Docker builds
-- 🔒 **Security** - CORS, security headers, input validation
-- 📱 **OTP Authentication** - One-time password support
-- 🎯 **Production Ready** - Graceful shutdown, proper error handling
+- **Authentication & Authorization** - JWT-based sessions with OAuth support
+- **Email & SMS Integration** - Resend and Twilio integration
+- **Analytics** - PostHog integration for user analytics
+- **Database** - PostgreSQL with Ent ORM for type-safe queries
+- **Docker Support** - Multi-stage Docker builds
+- **Security** - CORS, security headers, input validation
+- **OTP Authentication** - One-time password support
+- **Production Ready** - Graceful shutdown, proper error handling
 
 ## 🏗️ Architecture
 
