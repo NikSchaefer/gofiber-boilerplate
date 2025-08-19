@@ -1,164 +1,418 @@
-# 👋 Go-Fiber Boilerplate
-Golang Rest API boilerplate built with GORM, Go-Fiber, and a PostgreSQL database. Running in a docker container with Hot Reload.
+# 🚀 Go Fiber Boilerplate
 
-## Quickstart 🚀
-To quickly get started with the Go-Fiber Boilerplate, follow these steps:
+> A modern, production-ready Go REST API boilerplate built with [Fiber](https://gofiber.io/), [Ent ORM](https://entgo.io/), and PostgreSQL.
 
-1. Clone the repository:
+[![Go Version](https://img.shields.io/badge/Go-1.24.2+-blue.svg)](https://golang.org/)
+[![Fiber Version](https://img.shields.io/badge/Fiber-v2.5.0-green.svg)](https://gofiber.io/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/NikSchaefer/go-fiber)](https://goreportcard.com/report/github.com/NikSchaefer/go-fiber)
+
+## ✨ Features
+
+- 🔐 **Authentication & Authorization** - JWT-based sessions with OAuth support
+- 📧 **Email & SMS Integration** - Resend and Twilio integration
+- 📊 **Analytics** - PostHog integration for user analytics
+- 🗄️ **Database** - PostgreSQL with Ent ORM for type-safe queries
+- 🐳 **Docker Support** - Multi-stage Docker builds
+- 🔒 **Security** - CORS, security headers, input validation
+- 📱 **OTP Authentication** - One-time password support
+- 🎯 **Production Ready** - Graceful shutdown, proper error handling
+
+## 🏗️ Architecture
+
+```
+gofiber-boilerplate/
+├── config/          # Configuration management
+├── ent/            # Ent ORM generated code
+├── internal/       # Private application code
+│   ├── database/   # Database connection & setup
+│   ├── handlers/   # HTTP request handlers
+│   ├── middleware/ # Custom middleware
+│   ├── router/     # Route definitions
+│   └── services/   # Business logic
+├── model/          # Data models
+├── pkg/            # Public packages
+│   ├── analytics/  # Analytics integration
+│   ├── notifications/ # Email/SMS services
+│   ├── utils/      # Utility functions
+│   └── validator/  # Input validation
+└── seeds/          # Database seeders
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Go 1.24.2 or higher
+- PostgreSQL 12 or higher
+- Docker (optional)
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/NikSchaefer/go-fiber
+cd go-fiber
 ```
 
-2. Install Dependencies
+### 2. Install Dependencies
 
 ```bash
-cd go-fiber-boilerplate
 go mod tidy
 ```
 
-3. Connect the database: Create a `.env` file and put in a connection string
+### 3. Set Up Environment Variables
+
+Create a `.env` file in the root directory:
 
 ```bash
-DATABASE_URL="host=localhost port=5432 user=postgres password=password dbname=postgres sslmode=disable"
+# Copy the example environment file
+cp .env.example .env
 ```
 
-4. Start the project
+Configure your environment variables:
+
+```env
+# Database Configuration
+DATABASE_URL="host=localhost port=5432 user=postgres password=password dbname=postgres sslmode=disable"
+
+# Server Configuration
+PORT=8000
+STAGE=development
+ALLOWED_ORIGINS="http://localhost:3000,http://localhost:3001"
+
+# External Services (Optional for development)
+POSTHOG_KEY=your_posthog_key_here
+RESEND_KEY=your_resend_key_here
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+
+# OAuth Configuration (Optional for development)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Application Configuration
+APP_DOMAIN=localhost:8000
+TWILIO_PHONE_NUMBER=+1234567890
+```
+
+### 4. Set Up Database
+
+#### Option A: Using Docker (Recommended)
+
+```bash
+# Start PostgreSQL container
+docker run --name postgres-db \
+  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_DB=postgres \
+  -p 5432:5432 \
+  -d postgres:alpine
+
+# Wait a few seconds for the database to start
+```
+
+#### Option B: Local PostgreSQL
+
+Make sure PostgreSQL is running and create a database:
+
+```sql
+CREATE DATABASE postgres;
+```
+
+### 5. Run the Application
+
 ```bash
 go run main.go
 ```
 
-Alternatively, you can build a Docker image and run the project in a container, as seen below.
+The server will start on `http://localhost:8000`
 
-# File Structure 📁
-The file structure of the project is divided into five main folders and a main.go file.
-```py
-database/
-  connect.go
-  database.go
-handlers/
-  auth.go
-  product.go
-middleware/
-  json.go
-  auth.go
-  security.go
-model/
-  user.go
-  product.go
-  session.go
-router/
-  router.go
-main.go
+## 🐳 Docker Deployment
+
+### Build and Run with Docker
+
+```bash
+# Build the Docker image
+docker build -t go-fiber-app .
+
+# Run the container
+docker run -p 8000:8000 \
+  --env-file .env \
+  --name go-fiber-container \
+  go-fiber-app
 ```
 
-### Database 🗄️
-The database folder initializes the database connection and registers the models. You can add new models by registering them in connect.go. The global DB variable is initialized in database.go.
+## 📚 API Documentation
 
-### Handlers 🤝
-The handlers folder defines each request for each model and how it interacts with the database. The functions are mapped by the router to the corresponding URL links.
+### Authentication Endpoints
 
-### Middleware 🛡️
-The middleware folder contains a file for each middleware function. The security middleware is applied first to everything in router.go and applies general security middleware to the incoming requests. The JSON middleware serializes the incoming request so that it only allows JSON. Finally, the Authentication middleware is applied individually to requests that require the user to be logged in.
+#### User Registration
 
-### Router 🛣️
-The router file maps each incoming request to the corresponding function in handlers. It first applies the middleware and then groups the requests to each model and finally to the individual function.
+```http
+POST /auth/signup
+Content-Type: application/json
 
-### Main.go 🚀
-The main.go file reads environment variables and applies the CORS middleware. You can change the allowed request sites in the configuration. It then connects to the database by running the function from database/connect.go and finally initializes the app through the router.
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "securepassword123"
+}
+```
 
+#### Password Login
 
-# Debug 🐛
-The port can be specified with an environment variable but will default to 3000 if not specified.
+```http
+POST /auth/login/password
+Content-Type: application/json
 
-## Database 🗄️
+{
+  "email": "john@example.com",
+  "password": "securepassword123"
+}
+```
 
-to run the database on docker use the following command: 
+#### OTP Login Request
 
-`docker run --name database -d -p 5432:5432 -e POSTGRES_PASSWORD=password postgres:alpine`
+```http
+POST /auth/login/otp/request
+Content-Type: application/json
 
-To connect to the database you just started you can set the enviroment variable of 
+{
+  "email": "john@example.com"
+}
+```
 
-`DATABASE_URL="host=localhost port=5432 user=postgres password=password dbname=postgres sslmode=disable"`
+#### OTP Verification
 
-## Docker 🐳
-Docker build base image in first stage for development
+```http
+POST /auth/login/otp/verify
+Content-Type: application/json
 
-`docker build --target build -t base .`
+{
+  "email": "john@example.com",
+  "otp": "123456"
+}
+```
 
-run dev container
+#### Logout
 
-`docker run -p 3000:3000 --mount type=bind,source="C:\Users\schaefer\go\src\fiber",target=/go/src/app --name fiber -td base`
+```http
+DELETE /auth/logout
+Cookie: session=<session_token>
+```
 
-rebuild and run package
+### User Management
 
-`docker exec -it web go run main.go`
+#### Get Current User
 
-stop and remove container
+```http
+GET /users/me
+Cookie: session=<session_token>
+```
 
-`docker stop fiber; docker rm fiber`
+#### Update User Profile
 
-## Recommended 🙌
-run a postgres databse in docker and use the [fiber command line](https://github.com/gofiber/cli) to hot reload your application. Note: you can hot reload using docker or the fiber command line
+```http
+PATCH /users/profile
+Cookie: session=<session_token>
+Content-Type: application/json
 
-# API Documentation 📖
-This project provides a batteries included REST API that allows the user to interact with a PostgreSQL database. The available endpoints are listed below:
+{
+  "bio": "Software Developer",
+  "location": "San Francisco"
+}
+```
 
-### User Endpoints
+#### Change Password
 
-`POST /users/`
-Create a new user. The request should include a JSON payload with the following fields:
+```http
+POST /auth/password/change
+Cookie: session=<session_token>
+Content-Type: application/json
 
-- `username`: a string containing the user's username.
-- `password`: a string containing the user's password.
+{
+  "currentPassword": "oldpassword",
+  "newPassword": "newpassword123"
+}
+```
 
-`DELETE /users/`
-Delete the user. This endpoint requires the user to be authenticated.
+### OAuth Integration
 
-`PUT /users/`
-Change the user's password. This endpoint requires the user to be authenticated. The request should include a JSON payload with the following fields:
+#### Google OAuth
 
-- `oldPassword`: a string containing the user's current password.
-- `newPassword`: a string containing the user's new password.
+```http
+POST /auth/oauth/google
+Content-Type: application/json
 
-`POST /users/me`
-Get information about the user. This endpoint requires the user to be authenticated.
+{
+  "redirectUri": "http://localhost:3000/callback"
+}
+```
 
-`POST /users/login`
-Log in the user. The request should include a JSON payload with the following fields:
+## 🔧 Configuration
 
-- `username`: a string containing the user's username.
-- `password`: a string containing the user's password.
+### Environment Variables
 
-`DELETE /users/logout`
-Log out the user. This endpoint requires the user to be authenticated.
+| Variable               | Description                  | Default               | Required |
+| ---------------------- | ---------------------------- | --------------------- | -------- |
+| `DATABASE_URL`         | PostgreSQL connection string | -                     | ✅       |
+| `PORT`                 | Server port                  | `8000`                | ❌       |
+| `STAGE`                | Environment stage            | `development`         | ❌       |
+| `ALLOWED_ORIGINS`      | CORS allowed origins         | `localhost:3000,3001` | ❌       |
+| `POSTHOG_KEY`          | PostHog analytics key        | -                     | ❌       |
+| `RESEND_KEY`           | Resend email API key         | -                     | ❌       |
+| `TWILIO_ACCOUNT_SID`   | Twilio account SID           | -                     | ❌       |
+| `TWILIO_AUTH_TOKEN`    | Twilio auth token            | -                     | ❌       |
+| `GOOGLE_CLIENT_ID`     | Google OAuth client ID       | -                     | ❌       |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret   | -                     | ❌       |
 
-### Product Endpoints
+### Database Schema
 
-`POST /products/`
-Create a new product. This endpoint requires the user to be authenticated. The request should include a JSON payload with the following fields:
+The application uses Ent ORM with the following entities:
 
-- `name`: a string containing the name of the product.
-- `description`: a string containing the description of the product.
-- `price`: a float64 containing the price of the product.
+- **User** - User accounts and profiles
+- **Session** - User sessions and authentication
+- **OTP** - One-time passwords for authentication
+- **Account** - OAuth account connections
+- **Profile** - User profile information
 
-`POST /products/all`
-Get a list of all products.
+## 🛠️ Development
 
-`DELETE /products/:id`
-Delete a product by ID. This endpoint requires the user to be authenticated.
+### Project Structure
 
-`POST /products/:id`
-Get a product by ID.
+```
+internal/
+├── database/       # Database connection and setup
+├── handlers/       # HTTP request handlers
+│   ├── auth/       # Authentication handlers
+│   └── users/      # User management handlers
+├── middleware/     # Custom middleware
+│   ├── auth.go     # Authentication middleware
+│   ├── security.go # Security headers
+│   └── json.go     # JSON parsing middleware
+├── router/         # Route definitions
+└── services/       # Business logic layer
+```
 
-`PUT /products/:id`
-Update a product by ID. This endpoint requires the user to be authenticated. The request should include a JSON payload with the following fields:
+### Adding New Endpoints
 
-- `name`: a string containing the new name of the product.
-- `description`: a string containing the new description of the product.
-- `price`: a float64 containing the new price of the product.
-If you need more information about the request and response of each endpoint, please check the corresponding function in the handlers folder.
+1. **Create a handler** in `internal/handlers/`
+2. **Add business logic** in `internal/services/`
+3. **Define routes** in `internal/router/router.go`
+4. **Add validation** in `pkg/validator/`
 
-# License 📜
+### Database Migrations
 
-[MIT](https://choosealicense.com/licenses/mit/)
+The application uses Ent ORM for database management:
+
+```bash
+# Generate Ent code after schema changes
+go generate ./ent
+
+# Run migrations (automatic in development)
+go run main.go
+```
+
+### Testing
+
+```bash
+# Run all tests
+go test ./...
+
+# Run tests with coverage
+go test -cover ./...
+
+# Run specific test
+go test ./internal/handlers/auth
+```
+
+## 🔒 Security Features
+
+- **CORS Protection** - Configurable allowed origins
+- **Security Headers** - XSS protection, content type options
+- **Input Validation** - Request validation using validator
+- **Session Management** - Secure session handling
+- **Password Hashing** - bcrypt password hashing
+- **Rate Limiting** - Built-in rate limiting (configurable)
+
+## 📊 Monitoring & Analytics
+
+### Health Check
+
+```http
+GET /
+```
+
+Returns a simple health check response.
+
+### Analytics Integration
+
+The application includes PostHog integration for user analytics:
+
+```go
+// Track user events
+analytics.Track("user_signed_up", map[string]interface{}{
+    "user_id": user.ID,
+    "email": user.Email,
+})
+```
+
+## 🚀 Deployment
+
+### Production Checklist
+
+- [ ] Set `STAGE=production` in environment
+- [ ] Configure `ALLOWED_ORIGINS` with your domain
+- [ ] Set up SSL/TLS certificates
+- [ ] Configure database connection pooling
+- [ ] Set up monitoring and logging
+- [ ] Configure backup strategy
+- [ ] Set up CI/CD pipeline
+
+### Environment-Specific Configurations
+
+#### Development
+
+```env
+STAGE=development
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+```
+
+#### Production
+
+```env
+STAGE=production
+ALLOWED_ORIGINS=https://yourdomain.com
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Fiber](https://gofiber.io/) - Fast HTTP framework
+- [Ent](https://entgo.io/) - Type-safe ORM
+- [PostgreSQL](https://www.postgresql.org/) - Reliable database
+- [Resend](https://resend.com/) - Email delivery
+- [Twilio](https://www.twilio.com/) - SMS services
+- [PostHog](https://posthog.com/) - Product analytics
+
+## 📞 Support
+
+If you have any questions or need help:
+
+- Create an [issue](https://github.com/NikSchaefer/go-fiber/issues)
+- Check the [documentation](https://gofiber.io/)
+- Join our [Discord community](https://gofiber.io/discord)
+
+---
+
+**Made with ❤️**

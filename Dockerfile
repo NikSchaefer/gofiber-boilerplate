@@ -1,4 +1,4 @@
-FROM golang:1.16 AS build
+FROM golang:1.24 AS build
 
 WORKDIR /go/src/fiber
 
@@ -14,6 +14,6 @@ WORKDIR /app
 
 COPY --from=build /go/src/fiber/app .
 
-EXPOSE 3000
+EXPOSE 8000
 
 CMD ["./app"]
