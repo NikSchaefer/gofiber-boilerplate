@@ -2,11 +2,6 @@
 
 > A modern, production-ready Go REST API boilerplate built with [Fiber](https://gofiber.io/), [Ent ORM](https://entgo.io/), and PostgreSQL.
 
-[![Go Version](https://img.shields.io/badge/Go-1.24.2+-blue.svg)](https://golang.org/)
-[![Fiber Version](https://img.shields.io/badge/Fiber-v2.5.0-green.svg)](https://gofiber.io/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/NikSchaefer/go-fiber)](https://goreportcard.com/report/github.com/NikSchaefer/go-fiber)
-
 ## ✨ Features
 
 - 🔐 **Authentication & Authorization** - JWT-based sessions with OAuth support
