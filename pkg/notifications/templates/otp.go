@@ -30,7 +30,7 @@ var OTPTemplate = Template{
 
 		return EmailTemplateData{
 			Name:    otpData.Name,
-			Subject: "Your Olanah verification code",
+			Subject: "Your verification code",
 			Actions: []hermes.Action{
 				{
 					Instructions: "Please use the following code to verify your account:",
@@ -49,7 +49,7 @@ var OTPTemplate = Template{
 		}
 
 		return SMSTemplateData{
-			Message: fmt.Sprintf("Your Olanah verification code is: %s. Don't share this code with anyone.", otpData.OTP),
+			Message: fmt.Sprintf("Your verification code is: %s. Don't share this code with anyone.", otpData.OTP),
 		}, nil
 	},
 }
