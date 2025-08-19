@@ -1,26 +1,23 @@
 package middleware
 
 import (
-	"github.com/NikSchaefer/go-fiber/internal/handlers"
-	"github.com/NikSchaefer/go-fiber/model"
 	"github.com/gofiber/fiber/v2"
+	"github.com/NikSchaefer/go-fiber/internal/services"
 )
 
+// Authenticated middleware verifies that a user has a valid session and is verified
 func Authenticated(c *fiber.Ctx) error {
-	json := new(model.Session)
-	if err := c.BodyParser(json); err != nil {
-		return c.JSON(fiber.Map{
-			"code":    400,
-			"message": "Invalid Session Format",
-		})
+	// check if user is already in locals (Authenticated via other methods)
+	if c.Locals("user") != nil {
+		return c.Next()
 	}
-	user, err := handlers.GetUser(json.Sessionid)
+
+	user, err := services.ValidateSession(c.Context(), c.Cookies("session"))
 	if err != nil {
-		return c.JSON(fiber.Map{
-			"code":    404,
-			"message": "404: not found",
-		})
+		return err
 	}
+
+	c.Locals("auth_type", "session")
 	c.Locals("user", user)
 	return c.Next()
 }

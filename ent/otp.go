@@ -34,7 +34,7 @@ type OTP struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OTPQuery when eager-loading is set.
 	Edges        OTPEdges `json:"edges"`
-	user_otps    *int
+	user_otps    *uuid.UUID
 	selectValues sql.SelectValues
 }
 
@@ -72,7 +72,7 @@ func (*OTP) scanValues(columns []string) ([]any, error) {
 		case otp.FieldID:
 			values[i] = new(uuid.UUID)
 		case otp.ForeignKeys[0]: // user_otps
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -131,11 +131,11 @@ func (_m *OTP) assignValues(columns []string, values []any) error {
 				_m.ExpiresAt = value.Time
 			}
 		case otp.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_otps", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field user_otps", values[i])
 			} else if value.Valid {
-				_m.user_otps = new(int)
-				*_m.user_otps = int(value.Int64)
+				_m.user_otps = new(uuid.UUID)
+				*_m.user_otps = *value.S.(*uuid.UUID)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

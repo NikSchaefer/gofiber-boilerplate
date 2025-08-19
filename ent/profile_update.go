@@ -14,6 +14,7 @@ import (
 	"github.com/NikSchaefer/go-fiber/ent/predicate"
 	"github.com/NikSchaefer/go-fiber/ent/profile"
 	"github.com/NikSchaefer/go-fiber/ent/user"
+	"github.com/google/uuid"
 )
 
 // ProfileUpdate is the builder for updating Profile entities.
@@ -49,46 +50,6 @@ func (_u *ProfileUpdate) SetNillableName(v *string) *ProfileUpdate {
 	return _u
 }
 
-// SetAvatarURL sets the "avatar_url" field.
-func (_u *ProfileUpdate) SetAvatarURL(v string) *ProfileUpdate {
-	_u.mutation.SetAvatarURL(v)
-	return _u
-}
-
-// SetNillableAvatarURL sets the "avatar_url" field if the given value is not nil.
-func (_u *ProfileUpdate) SetNillableAvatarURL(v *string) *ProfileUpdate {
-	if v != nil {
-		_u.SetAvatarURL(*v)
-	}
-	return _u
-}
-
-// ClearAvatarURL clears the value of the "avatar_url" field.
-func (_u *ProfileUpdate) ClearAvatarURL() *ProfileUpdate {
-	_u.mutation.ClearAvatarURL()
-	return _u
-}
-
-// SetAvatarKey sets the "avatar_key" field.
-func (_u *ProfileUpdate) SetAvatarKey(v string) *ProfileUpdate {
-	_u.mutation.SetAvatarKey(v)
-	return _u
-}
-
-// SetNillableAvatarKey sets the "avatar_key" field if the given value is not nil.
-func (_u *ProfileUpdate) SetNillableAvatarKey(v *string) *ProfileUpdate {
-	if v != nil {
-		_u.SetAvatarKey(*v)
-	}
-	return _u
-}
-
-// ClearAvatarKey clears the value of the "avatar_key" field.
-func (_u *ProfileUpdate) ClearAvatarKey() *ProfileUpdate {
-	_u.mutation.ClearAvatarKey()
-	return _u
-}
-
 // SetBirthday sets the "birthday" field.
 func (_u *ProfileUpdate) SetBirthday(v time.Time) *ProfileUpdate {
 	_u.mutation.SetBirthday(v)
@@ -110,7 +71,7 @@ func (_u *ProfileUpdate) ClearBirthday() *ProfileUpdate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *ProfileUpdate) SetUserID(id int) *ProfileUpdate {
+func (_u *ProfileUpdate) SetUserID(id uuid.UUID) *ProfileUpdate {
 	_u.mutation.SetUserID(id)
 	return _u
 }
@@ -174,16 +135,6 @@ func (_u *ProfileUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Profile.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.AvatarURL(); ok {
-		if err := profile.AvatarURLValidator(v); err != nil {
-			return &ValidationError{Name: "avatar_url", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar_url": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.AvatarKey(); ok {
-		if err := profile.AvatarKeyValidator(v); err != nil {
-			return &ValidationError{Name: "avatar_key", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar_key": %w`, err)}
-		}
-	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Profile.user"`)
 	}
@@ -208,18 +159,6 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(profile.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AvatarURL(); ok {
-		_spec.SetField(profile.FieldAvatarURL, field.TypeString, value)
-	}
-	if _u.mutation.AvatarURLCleared() {
-		_spec.ClearField(profile.FieldAvatarURL, field.TypeString)
-	}
-	if value, ok := _u.mutation.AvatarKey(); ok {
-		_spec.SetField(profile.FieldAvatarKey, field.TypeString, value)
-	}
-	if _u.mutation.AvatarKeyCleared() {
-		_spec.ClearField(profile.FieldAvatarKey, field.TypeString)
-	}
 	if value, ok := _u.mutation.Birthday(); ok {
 		_spec.SetField(profile.FieldBirthday, field.TypeTime, value)
 	}
@@ -234,7 +173,7 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{profile.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -247,7 +186,7 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{profile.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -295,46 +234,6 @@ func (_u *ProfileUpdateOne) SetNillableName(v *string) *ProfileUpdateOne {
 	return _u
 }
 
-// SetAvatarURL sets the "avatar_url" field.
-func (_u *ProfileUpdateOne) SetAvatarURL(v string) *ProfileUpdateOne {
-	_u.mutation.SetAvatarURL(v)
-	return _u
-}
-
-// SetNillableAvatarURL sets the "avatar_url" field if the given value is not nil.
-func (_u *ProfileUpdateOne) SetNillableAvatarURL(v *string) *ProfileUpdateOne {
-	if v != nil {
-		_u.SetAvatarURL(*v)
-	}
-	return _u
-}
-
-// ClearAvatarURL clears the value of the "avatar_url" field.
-func (_u *ProfileUpdateOne) ClearAvatarURL() *ProfileUpdateOne {
-	_u.mutation.ClearAvatarURL()
-	return _u
-}
-
-// SetAvatarKey sets the "avatar_key" field.
-func (_u *ProfileUpdateOne) SetAvatarKey(v string) *ProfileUpdateOne {
-	_u.mutation.SetAvatarKey(v)
-	return _u
-}
-
-// SetNillableAvatarKey sets the "avatar_key" field if the given value is not nil.
-func (_u *ProfileUpdateOne) SetNillableAvatarKey(v *string) *ProfileUpdateOne {
-	if v != nil {
-		_u.SetAvatarKey(*v)
-	}
-	return _u
-}
-
-// ClearAvatarKey clears the value of the "avatar_key" field.
-func (_u *ProfileUpdateOne) ClearAvatarKey() *ProfileUpdateOne {
-	_u.mutation.ClearAvatarKey()
-	return _u
-}
-
 // SetBirthday sets the "birthday" field.
 func (_u *ProfileUpdateOne) SetBirthday(v time.Time) *ProfileUpdateOne {
 	_u.mutation.SetBirthday(v)
@@ -356,7 +255,7 @@ func (_u *ProfileUpdateOne) ClearBirthday() *ProfileUpdateOne {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *ProfileUpdateOne) SetUserID(id int) *ProfileUpdateOne {
+func (_u *ProfileUpdateOne) SetUserID(id uuid.UUID) *ProfileUpdateOne {
 	_u.mutation.SetUserID(id)
 	return _u
 }
@@ -433,16 +332,6 @@ func (_u *ProfileUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Profile.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.AvatarURL(); ok {
-		if err := profile.AvatarURLValidator(v); err != nil {
-			return &ValidationError{Name: "avatar_url", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar_url": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.AvatarKey(); ok {
-		if err := profile.AvatarKeyValidator(v); err != nil {
-			return &ValidationError{Name: "avatar_key", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar_key": %w`, err)}
-		}
-	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Profile.user"`)
 	}
@@ -484,18 +373,6 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(profile.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AvatarURL(); ok {
-		_spec.SetField(profile.FieldAvatarURL, field.TypeString, value)
-	}
-	if _u.mutation.AvatarURLCleared() {
-		_spec.ClearField(profile.FieldAvatarURL, field.TypeString)
-	}
-	if value, ok := _u.mutation.AvatarKey(); ok {
-		_spec.SetField(profile.FieldAvatarKey, field.TypeString, value)
-	}
-	if _u.mutation.AvatarKeyCleared() {
-		_spec.ClearField(profile.FieldAvatarKey, field.TypeString)
-	}
 	if value, ok := _u.mutation.Birthday(); ok {
 		_spec.SetField(profile.FieldBirthday, field.TypeTime, value)
 	}
@@ -510,7 +387,7 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 			Columns: []string{profile.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -523,7 +400,7 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 			Columns: []string{profile.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

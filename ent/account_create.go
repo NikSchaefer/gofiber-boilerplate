@@ -91,13 +91,13 @@ func (_c *AccountCreate) SetNillableID(v *uuid.UUID) *AccountCreate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_c *AccountCreate) SetUserID(id int) *AccountCreate {
+func (_c *AccountCreate) SetUserID(id uuid.UUID) *AccountCreate {
 	_c.mutation.SetUserID(id)
 	return _c
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_c *AccountCreate) SetNillableUserID(id *int) *AccountCreate {
+func (_c *AccountCreate) SetNillableUserID(id *uuid.UUID) *AccountCreate {
 	if id != nil {
 		_c = _c.SetUserID(*id)
 	}
@@ -247,7 +247,7 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

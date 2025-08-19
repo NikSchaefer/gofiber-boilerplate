@@ -50,7 +50,7 @@ type AccountMutation struct {
 	password_hash *[]byte
 	provider_id   *string
 	clearedFields map[string]struct{}
-	user          *int
+	user          *uuid.UUID
 	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Account, error)
@@ -368,7 +368,7 @@ func (m *AccountMutation) ResetProviderID() {
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
-func (m *AccountMutation) SetUserID(id int) {
+func (m *AccountMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
 }
 
@@ -383,7 +383,7 @@ func (m *AccountMutation) UserCleared() bool {
 }
 
 // UserID returns the "user" edge ID in the mutation.
-func (m *AccountMutation) UserID() (id int, exists bool) {
+func (m *AccountMutation) UserID() (id uuid.UUID, exists bool) {
 	if m.user != nil {
 		return *m.user, true
 	}
@@ -393,7 +393,7 @@ func (m *AccountMutation) UserID() (id int, exists bool) {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *AccountMutation) UserIDs() (ids []int) {
+func (m *AccountMutation) UserIDs() (ids []uuid.UUID) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -707,7 +707,7 @@ type OTPMutation struct {
 	used          *bool
 	expires_at    *time.Time
 	clearedFields map[string]struct{}
-	user          *int
+	user          *uuid.UUID
 	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*OTP, error)
@@ -1035,7 +1035,7 @@ func (m *OTPMutation) ResetExpiresAt() {
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
-func (m *OTPMutation) SetUserID(id int) {
+func (m *OTPMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
 }
 
@@ -1050,7 +1050,7 @@ func (m *OTPMutation) UserCleared() bool {
 }
 
 // UserID returns the "user" edge ID in the mutation.
-func (m *OTPMutation) UserID() (id int, exists bool) {
+func (m *OTPMutation) UserID() (id uuid.UUID, exists bool) {
 	if m.user != nil {
 		return *m.user, true
 	}
@@ -1060,7 +1060,7 @@ func (m *OTPMutation) UserID() (id int, exists bool) {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *OTPMutation) UserIDs() (ids []int) {
+func (m *OTPMutation) UserIDs() (ids []uuid.UUID) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2065,11 +2065,9 @@ type ProfileMutation struct {
 	created_at    *time.Time
 	updated_at    *time.Time
 	name          *string
-	avatar_url    *string
-	avatar_key    *string
 	birthday      *time.Time
 	clearedFields map[string]struct{}
-	user          *int
+	user          *uuid.UUID
 	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Profile, error)
@@ -2288,104 +2286,6 @@ func (m *ProfileMutation) ResetName() {
 	m.name = nil
 }
 
-// SetAvatarURL sets the "avatar_url" field.
-func (m *ProfileMutation) SetAvatarURL(s string) {
-	m.avatar_url = &s
-}
-
-// AvatarURL returns the value of the "avatar_url" field in the mutation.
-func (m *ProfileMutation) AvatarURL() (r string, exists bool) {
-	v := m.avatar_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAvatarURL returns the old "avatar_url" field's value of the Profile entity.
-// If the Profile object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProfileMutation) OldAvatarURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAvatarURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAvatarURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAvatarURL: %w", err)
-	}
-	return oldValue.AvatarURL, nil
-}
-
-// ClearAvatarURL clears the value of the "avatar_url" field.
-func (m *ProfileMutation) ClearAvatarURL() {
-	m.avatar_url = nil
-	m.clearedFields[profile.FieldAvatarURL] = struct{}{}
-}
-
-// AvatarURLCleared returns if the "avatar_url" field was cleared in this mutation.
-func (m *ProfileMutation) AvatarURLCleared() bool {
-	_, ok := m.clearedFields[profile.FieldAvatarURL]
-	return ok
-}
-
-// ResetAvatarURL resets all changes to the "avatar_url" field.
-func (m *ProfileMutation) ResetAvatarURL() {
-	m.avatar_url = nil
-	delete(m.clearedFields, profile.FieldAvatarURL)
-}
-
-// SetAvatarKey sets the "avatar_key" field.
-func (m *ProfileMutation) SetAvatarKey(s string) {
-	m.avatar_key = &s
-}
-
-// AvatarKey returns the value of the "avatar_key" field in the mutation.
-func (m *ProfileMutation) AvatarKey() (r string, exists bool) {
-	v := m.avatar_key
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAvatarKey returns the old "avatar_key" field's value of the Profile entity.
-// If the Profile object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProfileMutation) OldAvatarKey(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAvatarKey is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAvatarKey requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAvatarKey: %w", err)
-	}
-	return oldValue.AvatarKey, nil
-}
-
-// ClearAvatarKey clears the value of the "avatar_key" field.
-func (m *ProfileMutation) ClearAvatarKey() {
-	m.avatar_key = nil
-	m.clearedFields[profile.FieldAvatarKey] = struct{}{}
-}
-
-// AvatarKeyCleared returns if the "avatar_key" field was cleared in this mutation.
-func (m *ProfileMutation) AvatarKeyCleared() bool {
-	_, ok := m.clearedFields[profile.FieldAvatarKey]
-	return ok
-}
-
-// ResetAvatarKey resets all changes to the "avatar_key" field.
-func (m *ProfileMutation) ResetAvatarKey() {
-	m.avatar_key = nil
-	delete(m.clearedFields, profile.FieldAvatarKey)
-}
-
 // SetBirthday sets the "birthday" field.
 func (m *ProfileMutation) SetBirthday(t time.Time) {
 	m.birthday = &t
@@ -2436,7 +2336,7 @@ func (m *ProfileMutation) ResetBirthday() {
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
-func (m *ProfileMutation) SetUserID(id int) {
+func (m *ProfileMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
 }
 
@@ -2451,7 +2351,7 @@ func (m *ProfileMutation) UserCleared() bool {
 }
 
 // UserID returns the "user" edge ID in the mutation.
-func (m *ProfileMutation) UserID() (id int, exists bool) {
+func (m *ProfileMutation) UserID() (id uuid.UUID, exists bool) {
 	if m.user != nil {
 		return *m.user, true
 	}
@@ -2461,7 +2361,7 @@ func (m *ProfileMutation) UserID() (id int, exists bool) {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *ProfileMutation) UserIDs() (ids []int) {
+func (m *ProfileMutation) UserIDs() (ids []uuid.UUID) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2508,7 +2408,7 @@ func (m *ProfileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 4)
 	if m.created_at != nil {
 		fields = append(fields, profile.FieldCreatedAt)
 	}
@@ -2517,12 +2417,6 @@ func (m *ProfileMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, profile.FieldName)
-	}
-	if m.avatar_url != nil {
-		fields = append(fields, profile.FieldAvatarURL)
-	}
-	if m.avatar_key != nil {
-		fields = append(fields, profile.FieldAvatarKey)
 	}
 	if m.birthday != nil {
 		fields = append(fields, profile.FieldBirthday)
@@ -2541,10 +2435,6 @@ func (m *ProfileMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case profile.FieldName:
 		return m.Name()
-	case profile.FieldAvatarURL:
-		return m.AvatarURL()
-	case profile.FieldAvatarKey:
-		return m.AvatarKey()
 	case profile.FieldBirthday:
 		return m.Birthday()
 	}
@@ -2562,10 +2452,6 @@ func (m *ProfileMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case profile.FieldName:
 		return m.OldName(ctx)
-	case profile.FieldAvatarURL:
-		return m.OldAvatarURL(ctx)
-	case profile.FieldAvatarKey:
-		return m.OldAvatarKey(ctx)
 	case profile.FieldBirthday:
 		return m.OldBirthday(ctx)
 	}
@@ -2597,20 +2483,6 @@ func (m *ProfileMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
-		return nil
-	case profile.FieldAvatarURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAvatarURL(v)
-		return nil
-	case profile.FieldAvatarKey:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAvatarKey(v)
 		return nil
 	case profile.FieldBirthday:
 		v, ok := value.(time.Time)
@@ -2649,12 +2521,6 @@ func (m *ProfileMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *ProfileMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(profile.FieldAvatarURL) {
-		fields = append(fields, profile.FieldAvatarURL)
-	}
-	if m.FieldCleared(profile.FieldAvatarKey) {
-		fields = append(fields, profile.FieldAvatarKey)
-	}
 	if m.FieldCleared(profile.FieldBirthday) {
 		fields = append(fields, profile.FieldBirthday)
 	}
@@ -2672,12 +2538,6 @@ func (m *ProfileMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ProfileMutation) ClearField(name string) error {
 	switch name {
-	case profile.FieldAvatarURL:
-		m.ClearAvatarURL()
-		return nil
-	case profile.FieldAvatarKey:
-		m.ClearAvatarKey()
-		return nil
 	case profile.FieldBirthday:
 		m.ClearBirthday()
 		return nil
@@ -2697,12 +2557,6 @@ func (m *ProfileMutation) ResetField(name string) error {
 		return nil
 	case profile.FieldName:
 		m.ResetName()
-		return nil
-	case profile.FieldAvatarURL:
-		m.ResetAvatarURL()
-		return nil
-	case profile.FieldAvatarKey:
-		m.ResetAvatarKey()
 		return nil
 	case profile.FieldBirthday:
 		m.ResetBirthday()
@@ -2795,7 +2649,7 @@ type SessionMutation struct {
 	updated_at    *time.Time
 	expires       *time.Time
 	clearedFields map[string]struct{}
-	user          *int
+	user          *uuid.UUID
 	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Session, error)
@@ -3015,7 +2869,7 @@ func (m *SessionMutation) ResetExpires() {
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
-func (m *SessionMutation) SetUserID(id int) {
+func (m *SessionMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
 }
 
@@ -3030,7 +2884,7 @@ func (m *SessionMutation) UserCleared() bool {
 }
 
 // UserID returns the "user" edge ID in the mutation.
-func (m *SessionMutation) UserID() (id int, exists bool) {
+func (m *SessionMutation) UserID() (id uuid.UUID, exists bool) {
 	if m.user != nil {
 		return *m.user, true
 	}
@@ -3040,7 +2894,7 @@ func (m *SessionMutation) UserID() (id int, exists bool) {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *SessionMutation) UserIDs() (ids []int) {
+func (m *SessionMutation) UserIDs() (ids []uuid.UUID) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3297,7 +3151,9 @@ type UserMutation struct {
 	config
 	op                    Op
 	typ                   string
-	id                    *int
+	id                    *uuid.UUID
+	created_at            *time.Time
+	updated_at            *time.Time
 	email                 *string
 	email_verified        *bool
 	phone_number          *string
@@ -3339,7 +3195,7 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 }
 
 // withUserID sets the ID field of the mutation.
-func withUserID(id int) userOption {
+func withUserID(id uuid.UUID) userOption {
 	return func(m *UserMutation) {
 		var (
 			err   error
@@ -3389,9 +3245,15 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of User entities.
+func (m *UserMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id int, exists bool) {
+func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3402,12 +3264,12 @@ func (m *UserMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -3415,6 +3277,78 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *UserMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *UserMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *UserMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *UserMutation) ResetUpdatedAt() {
+	m.updated_at = nil
 }
 
 // SetEmail sets the "email" field.
@@ -3809,7 +3743,13 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, user.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, user.FieldUpdatedAt)
+	}
 	if m.email != nil {
 		fields = append(fields, user.FieldEmail)
 	}
@@ -3830,6 +3770,10 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case user.FieldCreatedAt:
+		return m.CreatedAt()
+	case user.FieldUpdatedAt:
+		return m.UpdatedAt()
 	case user.FieldEmail:
 		return m.Email()
 	case user.FieldEmailVerified:
@@ -3847,6 +3791,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case user.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case user.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	case user.FieldEmail:
 		return m.OldEmail(ctx)
 	case user.FieldEmailVerified:
@@ -3864,6 +3812,20 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case user.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
 	case user.FieldEmail:
 		v, ok := value.(string)
 		if !ok {
@@ -3950,6 +3912,12 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
+	case user.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case user.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
 	case user.FieldEmail:
 		m.ResetEmail()
 		return nil

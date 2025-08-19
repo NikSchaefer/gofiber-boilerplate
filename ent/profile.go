@@ -25,16 +25,12 @@ type Profile struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// URL to the avatar image
-	AvatarURL string `json:"avatar_url,omitempty"`
-	// S3 object key if avatar is uploaded, empty if external URL
-	AvatarKey string `json:"avatar_key,omitempty"`
 	// Birthday holds the value of the "birthday" field.
 	Birthday time.Time `json:"birthday,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProfileQuery when eager-loading is set.
 	Edges        ProfileEdges `json:"edges"`
-	user_profile *int
+	user_profile *uuid.UUID
 	selectValues sql.SelectValues
 }
 
@@ -63,14 +59,14 @@ func (*Profile) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profile.FieldName, profile.FieldAvatarURL, profile.FieldAvatarKey:
+		case profile.FieldName:
 			values[i] = new(sql.NullString)
 		case profile.FieldCreatedAt, profile.FieldUpdatedAt, profile.FieldBirthday:
 			values[i] = new(sql.NullTime)
 		case profile.FieldID:
 			values[i] = new(uuid.UUID)
 		case profile.ForeignKeys[0]: // user_profile
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -110,18 +106,6 @@ func (_m *Profile) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case profile.FieldAvatarURL:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field avatar_url", values[i])
-			} else if value.Valid {
-				_m.AvatarURL = value.String
-			}
-		case profile.FieldAvatarKey:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field avatar_key", values[i])
-			} else if value.Valid {
-				_m.AvatarKey = value.String
-			}
 		case profile.FieldBirthday:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field birthday", values[i])
@@ -129,11 +113,11 @@ func (_m *Profile) assignValues(columns []string, values []any) error {
 				_m.Birthday = value.Time
 			}
 		case profile.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_profile", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field user_profile", values[i])
 			} else if value.Valid {
-				_m.user_profile = new(int)
-				*_m.user_profile = int(value.Int64)
+				_m.user_profile = new(uuid.UUID)
+				*_m.user_profile = *value.S.(*uuid.UUID)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -184,12 +168,6 @@ func (_m *Profile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("avatar_url=")
-	builder.WriteString(_m.AvatarURL)
-	builder.WriteString(", ")
-	builder.WriteString("avatar_key=")
-	builder.WriteString(_m.AvatarKey)
 	builder.WriteString(", ")
 	builder.WriteString("birthday=")
 	builder.WriteString(_m.Birthday.Format(time.ANSIC))

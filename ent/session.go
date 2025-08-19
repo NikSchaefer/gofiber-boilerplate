@@ -28,7 +28,7 @@ type Session struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SessionQuery when eager-loading is set.
 	Edges         SessionEdges `json:"edges"`
-	user_sessions *int
+	user_sessions *uuid.UUID
 	selectValues  sql.SelectValues
 }
 
@@ -62,7 +62,7 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 		case session.FieldID:
 			values[i] = new(uuid.UUID)
 		case session.ForeignKeys[0]: // user_sessions
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -103,11 +103,11 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 				_m.Expires = value.Time
 			}
 		case session.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_sessions", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field user_sessions", values[i])
 			} else if value.Valid {
-				_m.user_sessions = new(int)
-				*_m.user_sessions = int(value.Int64)
+				_m.user_sessions = new(uuid.UUID)
+				*_m.user_sessions = *value.S.(*uuid.UUID)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

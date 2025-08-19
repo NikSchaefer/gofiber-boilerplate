@@ -30,8 +30,6 @@ const (
 	FieldExpiresAt = "expires_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
-	// UserFieldID holds the string denoting the ID field of the User.
-	UserFieldID = "id"
 	// Table holds the table name of the otp in the database.
 	Table = "ot_ps"
 	// UserTable is the table that holds the user relation/edge.
@@ -167,7 +165,7 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserInverseTable, UserFieldID),
+		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }

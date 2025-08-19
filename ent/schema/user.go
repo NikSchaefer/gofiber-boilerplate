@@ -11,6 +11,12 @@ type User struct {
 	ent.Schema
 }
 
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
+}
+
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("email").
@@ -101,14 +107,6 @@ func (Profile) Fields() []ent.Field {
 		field.String("name").
 			NotEmpty().
 			MaxLen(255),
-		field.String("avatar_url").
-			Optional().
-			MaxLen(2048).
-			Comment("URL to the avatar image"),
-		field.String("avatar_key").
-			Optional().
-			MaxLen(255).
-			Comment("S3 object key if avatar is uploaded, empty if external URL"),
 		field.Time("birthday").
 			Optional(),
 	}

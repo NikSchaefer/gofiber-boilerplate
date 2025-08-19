@@ -1,41 +1,48 @@
 package router
 
 import (
-	"github.com/NikSchaefer/go-fiber/internal/handlers"
-	"github.com/NikSchaefer/go-fiber/middleware"
+	auth_handlers "github.com/NikSchaefer/go-fiber/internal/handlers/auth"
+	user_handlers "github.com/NikSchaefer/go-fiber/internal/handlers/users"
+	"github.com/NikSchaefer/go-fiber/internal/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
-func Initalize(router *fiber.App) {
-
+func Initialize(router *fiber.App) {
 	router.Use(middleware.Security)
 
 	router.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(200).SendString("Hello, World!")
 	})
 
-	router.Use(middleware.Json)
+	auth := router.Group("/auth")
+	{
+		// Login related
+		auth.Post("/login/password", auth_handlers.LoginWithPassword)
+		auth.Post("/login/otp/request", auth_handlers.RequestLoginWithOTP)
+		auth.Post("/login/otp/verify", auth_handlers.VerifyLoginWithOTP)
+		auth.Delete("/logout", middleware.Authenticated, auth_handlers.Logout)
 
-	users := router.Group("/users")
-	users.Post("/", handlers.CreateUser)
-	users.Delete("/", middleware.Authenticated, handlers.DeleteUser)
-	users.Put("/", middleware.Authenticated, handlers.ChangePassword)
-	users.Post("/me", middleware.Authenticated, handlers.GetUserInfo)
-	users.Post("/login", handlers.Login)
-	users.Delete("/logout", handlers.Logout)
+		// OAuth routes
+		auth.Post("/oauth/google", auth_handlers.GetGoogleAuthRedirect)
+		auth.Post("/oauth/google/callback", auth_handlers.GetGoogleAuthCallback)
+		auth.Post("/oauth/google/native/callback", auth_handlers.GetGoogleNativeAuthCallback)
 
-	products := router.Group("/products", middleware.Authenticated)
-	products.Post("/", handlers.CreateProduct)
-	products.Post("/all", handlers.GetProducts)
-	products.Delete("/:id", handlers.DeleteProduct)
-	products.Post("/:id", handlers.GetProductById)
-	products.Put("/:id", handlers.UpdateProduct)
+		// Registration
+		auth.Post("/signup", auth_handlers.SignUp)
 
-	router.Use(func(c *fiber.Ctx) error {
-		return c.Status(404).JSON(fiber.Map{
-			"code":    404,
-			"message": "404: Not Found",
-		})
-	})
+		// Password management
+		auth.Post("/password/change", middleware.Authenticated, auth_handlers.ChangePassword)
+		auth.Post("/password/reset/request", auth_handlers.ResetPassword)
+		auth.Post("/password/reset/verify", auth_handlers.VerifyResetPassword)
+	}
 
+	// User routes
+	user := router.Group("/users", middleware.Authenticated)
+	{
+		user.Get("/me", user_handlers.GetCurrentUserInfo)
+		user.Get("/profile", user_handlers.GetUserProfile)
+		user.Patch("/", user_handlers.UpdateUser)
+		user.Patch("/profile", user_handlers.UpdateProfile)
+		user.Delete("/", user_handlers.DeleteUser)
+	}
 }

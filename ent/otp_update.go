@@ -14,6 +14,7 @@ import (
 	"github.com/NikSchaefer/go-fiber/ent/otp"
 	"github.com/NikSchaefer/go-fiber/ent/predicate"
 	"github.com/NikSchaefer/go-fiber/ent/user"
+	"github.com/google/uuid"
 )
 
 // OTPUpdate is the builder for updating OTP entities.
@@ -64,7 +65,7 @@ func (_u *OTPUpdate) SetNillableUsed(v *bool) *OTPUpdate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *OTPUpdate) SetUserID(id int) *OTPUpdate {
+func (_u *OTPUpdate) SetUserID(id uuid.UUID) *OTPUpdate {
 	_u.mutation.SetUserID(id)
 	return _u
 }
@@ -163,7 +164,7 @@ func (_u *OTPUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{otp.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -176,7 +177,7 @@ func (_u *OTPUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{otp.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -239,7 +240,7 @@ func (_u *OTPUpdateOne) SetNillableUsed(v *bool) *OTPUpdateOne {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *OTPUpdateOne) SetUserID(id int) *OTPUpdateOne {
+func (_u *OTPUpdateOne) SetUserID(id uuid.UUID) *OTPUpdateOne {
 	_u.mutation.SetUserID(id)
 	return _u
 }
@@ -368,7 +369,7 @@ func (_u *OTPUpdateOne) sqlSave(ctx context.Context) (_node *OTP, err error) {
 			Columns: []string{otp.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -381,7 +382,7 @@ func (_u *OTPUpdateOne) sqlSave(ctx context.Context) (_node *OTP, err error) {
 			Columns: []string{otp.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

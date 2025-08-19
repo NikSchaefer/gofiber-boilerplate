@@ -79,7 +79,7 @@ func (_c *SessionCreate) SetNillableID(v *uuid.UUID) *SessionCreate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_c *SessionCreate) SetUserID(id int) *SessionCreate {
+func (_c *SessionCreate) SetUserID(id uuid.UUID) *SessionCreate {
 	_c.mutation.SetUserID(id)
 	return _c
 }
@@ -211,7 +211,7 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			Columns: []string{session.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

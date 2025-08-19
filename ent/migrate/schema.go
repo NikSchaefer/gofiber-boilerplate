@@ -16,7 +16,7 @@ var (
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"password", "google", "apple"}},
 		{Name: "password_hash", Type: field.TypeBytes, Nullable: true, Size: 255},
 		{Name: "provider_id", Type: field.TypeString, Unique: true, Nullable: true, Size: 255},
-		{Name: "user_accounts", Type: field.TypeInt, Nullable: true},
+		{Name: "user_accounts", Type: field.TypeUUID, Nullable: true},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
 	AccountsTable = &schema.Table{
@@ -41,7 +41,7 @@ var (
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"login", "password_reset"}, Default: "login"},
 		{Name: "used", Type: field.TypeBool, Default: false},
 		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "user_otps", Type: field.TypeInt},
+		{Name: "user_otps", Type: field.TypeUUID},
 	}
 	// OtPsTable holds the schema information for the "ot_ps" table.
 	OtPsTable = &schema.Table{
@@ -79,10 +79,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 255},
-		{Name: "avatar_url", Type: field.TypeString, Nullable: true, Size: 2048},
-		{Name: "avatar_key", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "birthday", Type: field.TypeTime, Nullable: true},
-		{Name: "user_profile", Type: field.TypeInt, Unique: true},
+		{Name: "user_profile", Type: field.TypeUUID, Unique: true},
 	}
 	// ProfilesTable holds the schema information for the "profiles" table.
 	ProfilesTable = &schema.Table{
@@ -92,7 +90,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "profiles_users_profile",
-				Columns:    []*schema.Column{ProfilesColumns[7]},
+				Columns:    []*schema.Column{ProfilesColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -104,7 +102,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "expires", Type: field.TypeTime},
-		{Name: "user_sessions", Type: field.TypeInt},
+		{Name: "user_sessions", Type: field.TypeUUID},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
 	SessionsTable = &schema.Table{
@@ -122,7 +120,9 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "oid", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 255},
 		{Name: "email_verified", Type: field.TypeBool, Default: false},
 		{Name: "phone_number", Type: field.TypeString, Unique: true, Nullable: true, Size: 255},

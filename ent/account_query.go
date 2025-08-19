@@ -411,8 +411,8 @@ func (_q *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 }
 
 func (_q *AccountQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Account, init func(*Account), assign func(*Account, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Account)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Account)
 	for i := range nodes {
 		if nodes[i].user_accounts == nil {
 			continue

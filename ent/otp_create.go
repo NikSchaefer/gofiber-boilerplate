@@ -121,7 +121,7 @@ func (_c *OTPCreate) SetNillableID(v *uuid.UUID) *OTPCreate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_c *OTPCreate) SetUserID(id int) *OTPCreate {
+func (_c *OTPCreate) SetUserID(id uuid.UUID) *OTPCreate {
 	_c.mutation.SetUserID(id)
 	return _c
 }
@@ -296,7 +296,7 @@ func (_c *OTPCreate) createSpec() (*OTP, *sqlgraph.CreateSpec) {
 			Columns: []string{otp.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

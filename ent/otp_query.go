@@ -411,8 +411,8 @@ func (_q *OTPQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*OTP, err
 }
 
 func (_q *OTPQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*OTP, init func(*OTP), assign func(*OTP, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*OTP)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*OTP)
 	for i := range nodes {
 		if nodes[i].user_otps == nil {
 			continue

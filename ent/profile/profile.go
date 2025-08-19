@@ -21,16 +21,10 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldAvatarURL holds the string denoting the avatar_url field in the database.
-	FieldAvatarURL = "avatar_url"
-	// FieldAvatarKey holds the string denoting the avatar_key field in the database.
-	FieldAvatarKey = "avatar_key"
 	// FieldBirthday holds the string denoting the birthday field in the database.
 	FieldBirthday = "birthday"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
-	// UserFieldID holds the string denoting the ID field of the User.
-	UserFieldID = "id"
 	// Table holds the table name of the profile in the database.
 	Table = "profiles"
 	// UserTable is the table that holds the user relation/edge.
@@ -48,8 +42,6 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldName,
-	FieldAvatarURL,
-	FieldAvatarKey,
 	FieldBirthday,
 }
 
@@ -83,10 +75,6 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// AvatarURLValidator is a validator for the "avatar_url" field. It is called by the builders before save.
-	AvatarURLValidator func(string) error
-	// AvatarKeyValidator is a validator for the "avatar_key" field. It is called by the builders before save.
-	AvatarKeyValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -114,16 +102,6 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByAvatarURL orders the results by the avatar_url field.
-func ByAvatarURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAvatarURL, opts...).ToFunc()
-}
-
-// ByAvatarKey orders the results by the avatar_key field.
-func ByAvatarKey(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAvatarKey, opts...).ToFunc()
-}
-
 // ByBirthday orders the results by the birthday field.
 func ByBirthday(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBirthday, opts...).ToFunc()
@@ -138,7 +116,7 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserInverseTable, UserFieldID),
+		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, true, UserTable, UserColumn),
 	)
 }

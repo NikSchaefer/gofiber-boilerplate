@@ -411,8 +411,8 @@ func (_q *ProfileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Prof
 }
 
 func (_q *ProfileQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Profile, init func(*Profile), assign func(*Profile, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Profile)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Profile)
 	for i := range nodes {
 		if nodes[i].user_profile == nil {
 			continue

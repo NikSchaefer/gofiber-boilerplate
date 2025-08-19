@@ -171,14 +171,6 @@ func init() {
 			return nil
 		}
 	}()
-	// profileDescAvatarURL is the schema descriptor for avatar_url field.
-	profileDescAvatarURL := profileFields[1].Descriptor()
-	// profile.AvatarURLValidator is a validator for the "avatar_url" field. It is called by the builders before save.
-	profile.AvatarURLValidator = profileDescAvatarURL.Validators[0].(func(string) error)
-	// profileDescAvatarKey is the schema descriptor for avatar_key field.
-	profileDescAvatarKey := profileFields[2].Descriptor()
-	// profile.AvatarKeyValidator is a validator for the "avatar_key" field. It is called by the builders before save.
-	profile.AvatarKeyValidator = profileDescAvatarKey.Validators[0].(func(string) error)
 	// profileDescID is the schema descriptor for id field.
 	profileDescID := profileMixinFields0[0].Descriptor()
 	// profile.DefaultID holds the default value on creation for the id field.
@@ -206,8 +198,21 @@ func init() {
 	sessionDescID := sessionMixinFields0[0].Descriptor()
 	// session.DefaultID holds the default value on creation for the id field.
 	session.DefaultID = sessionDescID.Default.(func() uuid.UUID)
+	userMixin := schema.User{}.Mixin()
+	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userMixinFields0[1].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userMixinFields0[2].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescEmail is the schema descriptor for email field.
 	userDescEmail := userFields[0].Descriptor()
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
@@ -238,4 +243,8 @@ func init() {
 	userDescPhoneNumberVerified := userFields[3].Descriptor()
 	// user.DefaultPhoneNumberVerified holds the default value on creation for the phone_number_verified field.
 	user.DefaultPhoneNumberVerified = userDescPhoneNumberVerified.Default.(bool)
+	// userDescID is the schema descriptor for id field.
+	userDescID := userMixinFields0[0].Descriptor()
+	// user.DefaultID holds the default value on creation for the id field.
+	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 }

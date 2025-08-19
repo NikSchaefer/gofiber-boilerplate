@@ -14,6 +14,7 @@ import (
 	"github.com/NikSchaefer/go-fiber/ent/account"
 	"github.com/NikSchaefer/go-fiber/ent/predicate"
 	"github.com/NikSchaefer/go-fiber/ent/user"
+	"github.com/google/uuid"
 )
 
 // AccountUpdate is the builder for updating Account entities.
@@ -82,13 +83,13 @@ func (_u *AccountUpdate) ClearProviderID() *AccountUpdate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *AccountUpdate) SetUserID(id int) *AccountUpdate {
+func (_u *AccountUpdate) SetUserID(id uuid.UUID) *AccountUpdate {
 	_u.mutation.SetUserID(id)
 	return _u
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_u *AccountUpdate) SetNillableUserID(id *int) *AccountUpdate {
+func (_u *AccountUpdate) SetNillableUserID(id *uuid.UUID) *AccountUpdate {
 	if id != nil {
 		_u = _u.SetUserID(*id)
 	}
@@ -205,7 +206,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -218,7 +219,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -299,13 +300,13 @@ func (_u *AccountUpdateOne) ClearProviderID() *AccountUpdateOne {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *AccountUpdateOne) SetUserID(id int) *AccountUpdateOne {
+func (_u *AccountUpdateOne) SetUserID(id uuid.UUID) *AccountUpdateOne {
 	_u.mutation.SetUserID(id)
 	return _u
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_u *AccountUpdateOne) SetNillableUserID(id *int) *AccountUpdateOne {
+func (_u *AccountUpdateOne) SetNillableUserID(id *uuid.UUID) *AccountUpdateOne {
 	if id != nil {
 		_u = _u.SetUserID(*id)
 	}
@@ -452,7 +453,7 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -465,7 +466,7 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

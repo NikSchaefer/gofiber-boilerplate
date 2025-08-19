@@ -56,34 +56,6 @@ func (_c *ProfileCreate) SetName(v string) *ProfileCreate {
 	return _c
 }
 
-// SetAvatarURL sets the "avatar_url" field.
-func (_c *ProfileCreate) SetAvatarURL(v string) *ProfileCreate {
-	_c.mutation.SetAvatarURL(v)
-	return _c
-}
-
-// SetNillableAvatarURL sets the "avatar_url" field if the given value is not nil.
-func (_c *ProfileCreate) SetNillableAvatarURL(v *string) *ProfileCreate {
-	if v != nil {
-		_c.SetAvatarURL(*v)
-	}
-	return _c
-}
-
-// SetAvatarKey sets the "avatar_key" field.
-func (_c *ProfileCreate) SetAvatarKey(v string) *ProfileCreate {
-	_c.mutation.SetAvatarKey(v)
-	return _c
-}
-
-// SetNillableAvatarKey sets the "avatar_key" field if the given value is not nil.
-func (_c *ProfileCreate) SetNillableAvatarKey(v *string) *ProfileCreate {
-	if v != nil {
-		_c.SetAvatarKey(*v)
-	}
-	return _c
-}
-
 // SetBirthday sets the "birthday" field.
 func (_c *ProfileCreate) SetBirthday(v time.Time) *ProfileCreate {
 	_c.mutation.SetBirthday(v)
@@ -113,7 +85,7 @@ func (_c *ProfileCreate) SetNillableID(v *uuid.UUID) *ProfileCreate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_c *ProfileCreate) SetUserID(id int) *ProfileCreate {
+func (_c *ProfileCreate) SetUserID(id uuid.UUID) *ProfileCreate {
 	_c.mutation.SetUserID(id)
 	return _c
 }
@@ -188,16 +160,6 @@ func (_c *ProfileCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Profile.name": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.AvatarURL(); ok {
-		if err := profile.AvatarURLValidator(v); err != nil {
-			return &ValidationError{Name: "avatar_url", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar_url": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.AvatarKey(); ok {
-		if err := profile.AvatarKeyValidator(v); err != nil {
-			return &ValidationError{Name: "avatar_key", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar_key": %w`, err)}
-		}
-	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Profile.user"`)}
 	}
@@ -248,14 +210,6 @@ func (_c *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 		_spec.SetField(profile.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.AvatarURL(); ok {
-		_spec.SetField(profile.FieldAvatarURL, field.TypeString, value)
-		_node.AvatarURL = value
-	}
-	if value, ok := _c.mutation.AvatarKey(); ok {
-		_spec.SetField(profile.FieldAvatarKey, field.TypeString, value)
-		_node.AvatarKey = value
-	}
 	if value, ok := _c.mutation.Birthday(); ok {
 		_spec.SetField(profile.FieldBirthday, field.TypeTime, value)
 		_node.Birthday = value
@@ -268,7 +222,7 @@ func (_c *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 			Columns: []string{profile.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

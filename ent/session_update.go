@@ -14,6 +14,7 @@ import (
 	"github.com/NikSchaefer/go-fiber/ent/predicate"
 	"github.com/NikSchaefer/go-fiber/ent/session"
 	"github.com/NikSchaefer/go-fiber/ent/user"
+	"github.com/google/uuid"
 )
 
 // SessionUpdate is the builder for updating Session entities.
@@ -36,7 +37,7 @@ func (_u *SessionUpdate) SetUpdatedAt(v time.Time) *SessionUpdate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *SessionUpdate) SetUserID(id int) *SessionUpdate {
+func (_u *SessionUpdate) SetUserID(id uuid.UUID) *SessionUpdate {
 	_u.mutation.SetUserID(id)
 	return _u
 }
@@ -124,7 +125,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{session.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -137,7 +138,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{session.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -172,7 +173,7 @@ func (_u *SessionUpdateOne) SetUpdatedAt(v time.Time) *SessionUpdateOne {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *SessionUpdateOne) SetUserID(id int) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetUserID(id uuid.UUID) *SessionUpdateOne {
 	_u.mutation.SetUserID(id)
 	return _u
 }
@@ -290,7 +291,7 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 			Columns: []string{session.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -303,7 +304,7 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 			Columns: []string{session.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

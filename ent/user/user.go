@@ -3,15 +3,22 @@
 package user
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
+	FieldID = "oid"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldEmailVerified holds the string denoting the email_verified field in the database.
@@ -28,14 +35,6 @@ const (
 	EdgeSessions = "sessions"
 	// EdgeOtps holds the string denoting the otps edge name in mutations.
 	EdgeOtps = "otps"
-	// AccountFieldID holds the string denoting the ID field of the Account.
-	AccountFieldID = "oid"
-	// ProfileFieldID holds the string denoting the ID field of the Profile.
-	ProfileFieldID = "oid"
-	// SessionFieldID holds the string denoting the ID field of the Session.
-	SessionFieldID = "oid"
-	// OTPFieldID holds the string denoting the ID field of the OTP.
-	OTPFieldID = "oid"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// AccountsTable is the table that holds the accounts relation/edge.
@@ -71,6 +70,8 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldEmail,
 	FieldEmailVerified,
 	FieldPhoneNumber,
@@ -88,6 +89,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
 	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
@@ -96,6 +103,8 @@ var (
 	PhoneNumberValidator func(string) error
 	// DefaultPhoneNumberVerified holds the default value on creation for the "phone_number_verified" field.
 	DefaultPhoneNumberVerified bool
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )
 
 // OrderOption defines the ordering options for the User queries.
@@ -104,6 +113,16 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
 // ByEmail orders the results by the email field.
@@ -177,28 +196,28 @@ func ByOtps(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 func newAccountsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AccountsInverseTable, AccountFieldID),
+		sqlgraph.To(AccountsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AccountsTable, AccountsColumn),
 	)
 }
 func newProfileStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ProfileInverseTable, ProfileFieldID),
+		sqlgraph.To(ProfileInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, ProfileTable, ProfileColumn),
 	)
 }
 func newSessionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SessionsInverseTable, SessionFieldID),
+		sqlgraph.To(SessionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
 	)
 }
 func newOtpsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(OtpsInverseTable, OTPFieldID),
+		sqlgraph.To(OtpsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, OtpsTable, OtpsColumn),
 	)
 }

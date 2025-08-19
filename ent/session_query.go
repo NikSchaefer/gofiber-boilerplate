@@ -411,8 +411,8 @@ func (_q *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 }
 
 func (_q *SessionQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Session, init func(*Session), assign func(*Session, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Session)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Session)
 	for i := range nodes {
 		if nodes[i].user_sessions == nil {
 			continue
