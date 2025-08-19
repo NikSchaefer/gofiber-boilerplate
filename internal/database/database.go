@@ -3,16 +3,16 @@ package database
 import (
 	"context"
 	"log"
-	"os"
 
-	_ "github.com/lib/pq"
+	"github.com/NikSchaefer/go-fiber/config"
 	"github.com/NikSchaefer/go-fiber/ent"
+	_ "github.com/lib/pq"
 )
 
 var DB *ent.Client
 
 func InitializeDB(autoMigrate bool) {
-	client, err := ent.Open("postgres", os.Getenv("DATABASE_URL"))
+	client, err := ent.Open("postgres", config.GetDatabaseURL())
 	if err != nil {
 		log.Fatal(err)
 	}

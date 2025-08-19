@@ -17,7 +17,7 @@ type smsSender struct {
 func NewSMSSender() SMSSender {
 	return &smsSender{
 		client:          twilio.NewRestClient(),
-		fromPhoneNumber: config.TWILIO_PHONE_NUMBER,
+		fromPhoneNumber: config.GetTwilioPhoneNumber(),
 	}
 }
 

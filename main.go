@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/NikSchaefer/go-fiber/config"
 	"github.com/NikSchaefer/go-fiber/internal/database"
 	"github.com/NikSchaefer/go-fiber/internal/router"
 	util "github.com/NikSchaefer/go-fiber/pkg"
@@ -23,7 +24,7 @@ func InitializeApp() *fiber.App {
 	app.Use(logger.New())
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "*", // replace with your domain (e.g. google.com)
+		AllowOrigins:     config.GetAllowedOrigins(), // replace with your domain (e.g. google.com)
 		AllowHeaders:     "Origin, Content-Type, Accept, Cookie",
 		AllowCredentials: true,
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS,PATCH",
@@ -40,7 +41,7 @@ func main() {
 	app := InitializeApp()
 
 	defer database.CloseDB()
-	err := app.Listen(":8000")
+	err := app.Listen(":" + config.GetPort())
 	if err != nil {
 		log.Fatal("Error starting server: ", err)
 	}
