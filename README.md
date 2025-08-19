@@ -108,7 +108,6 @@ docker run --name postgres-db \
   -d postgres:alpine
 
 # Wait a few seconds for the database to start
-sleep 5
 ```
 
 #### Option B: Local PostgreSQL
@@ -140,45 +139,6 @@ docker run -p 8000:8000 \
   --env-file .env \
   --name go-fiber-container \
   go-fiber-app
-```
-
-### Docker Compose (Recommended)
-
-Create a `docker-compose.yml` file:
-
-```yaml
-version: "3.8"
-
-services:
-  app:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgres://postgres:password@db:5432/postgres?sslmode=disable
-    depends_on:
-      - db
-    env_file:
-      - .env
-
-  db:
-    image: postgres:alpine
-    environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-```
-
-Run with Docker Compose:
-
-```bash
-docker-compose up -d
 ```
 
 ## 📚 API Documentation
@@ -455,4 +415,4 @@ If you have any questions or need help:
 
 ---
 
-**Made with ❤️ by the Go Fiber community**
+**Made with ❤️**
